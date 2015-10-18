@@ -5,11 +5,13 @@ ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 WEB_DIR:=$(ROOT_DIR)/server/web
 PATH:=$(WEB_DIR)/node_modules/.bin:$(PATH)
 
+DEBUG=1
+
 npm_install:
 	cd $(WEB_DIR) && npm install
 
 js:
-	cd $(WEB_DIR) && webpack
+	NODE_ENV=$(if $(DEBUG),development,production) webpack --config $(WEB_DIR)/webpack.config.js --progress --colors --display-error-details $(WEBPACK_ARGS)
 
 js_watch:
-	cd $(WEB_DIR) && webpack --watch
+	$(MAKE) js WEBPACK_ARGS=--watch
