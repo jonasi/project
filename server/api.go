@@ -20,13 +20,11 @@ func getServer(c *http.Context) *Server {
 	return c.Context.Value(serverKey).(*Server)
 }
 
-var json = &http.JSON{
-	TransformFunc: func(d interface{}) interface{} {
-		return map[string]interface{}{
-			"data": d,
-		}
-	},
-}
+var json = http.JSON(func(d interface{}) interface{} {
+	return map[string]interface{}{
+		"data": d,
+	}
+})
 
 var GetVersion = http.GET("/version", json,
 	http.HandlerFunc(func(c *http.Context) {
