@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/jonasi/http"
 	"gopkg.in/tylerb/graceful.v1"
+	"html/template"
 	httpserver "net/http"
 	"time"
 )
@@ -11,6 +12,9 @@ func New() *Server {
 	r := http.NewRouter()
 
 	r.Register(
+		ServeIndex,
+		ServeAssets,
+
 		GetVersion,
 		Shutdown,
 	)
@@ -25,7 +29,12 @@ func New() *Server {
 		stopCh: make(chan struct{}),
 	}
 
-	r.AddGlobalHandler(serverMiddleware(s))
+	t := template.Must(template.ParseGlob("server/templates/*"))
+
+	r.AddGlobalHandler(
+		serverMiddleware(s),
+		&http.Template{Template: t},
+	)
 
 	return s
 }

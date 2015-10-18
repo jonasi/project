@@ -30,13 +30,13 @@ var json = &http.JSON{
 
 var GetVersion = http.GET("/version", json,
 	http.HandlerFunc(func(c *http.Context) {
-		json.SetResponse(c, Version)
+		http.JSONResponse(c, Version)
 	}),
 )
 
 var Shutdown = http.DELETE("/server", json,
 	http.HandlerFunc(func(c *http.Context) {
 		getServer(c).Close()
-		json.SetResponse(c, true)
+		http.JSONResponse(c, true)
 	}),
 )

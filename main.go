@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/jonasi/project/server"
 	"github.com/ogier/pflag"
 	"os"
@@ -8,8 +9,8 @@ import (
 
 func main() {
 	var (
-		foreground = pflag.BoolP("foreground", "f", false, "run the server in the foreground")
-		help       = pflag.BoolP("help", "h", false, "show this help")
+		runServer = pflag.BoolP("server", "s", false, "run the server in the foreground")
+		help      = pflag.BoolP("help", "h", false, "show this help")
 	)
 
 	pflag.Parse()
@@ -19,12 +20,15 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *foreground {
+	if *runServer {
+		s := server.New()
+
+		if err := s.Listen(); err != nil {
+			fmt.Fprintln(os.Stderr, "Server err: %s", err)
+			os.Exit(1)
+		}
+
+		os.Exit(0)
 	}
 
-	s := server.New()
-
-	if err := s.Listen(); err != nil {
-		panic(err)
-	}
 }
