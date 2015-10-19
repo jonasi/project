@@ -1,0 +1,26 @@
+@import 'normalize.css';
+@import 'skeleton.css/skeleton.css'; 
+
+:global {
+    html, body, #react-root {
+        height: 100%;
+    }
+}
+
+.container {
+    height: 100%;
+    font-family: courier;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+
+    .header {
+        flex: 0 0 auto;
+        padding: 1em 2em;
+    }
+
+    .content {
+        flex: 1 1;
+        overflow: auto;
+    }
+}

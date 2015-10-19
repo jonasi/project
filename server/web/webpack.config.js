@@ -25,6 +25,7 @@ var config = module.exports = {
 
         loaders: [
             { test: /\.js$/, exclude: /node_modules/, loader: 'babel' },
+            { test: /\.css$/, exclude: /node_modules/, loader: 'style!css?modules&importLoaders!postcss' },
         ],
     },
 
@@ -38,6 +39,11 @@ var config = module.exports = {
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify(nodeEnv),
         }),
+    ],
+
+    postcss: [
+        require('autoprefixer'),
+        require('postcss-nested'),
     ],
 };
 
