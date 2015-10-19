@@ -2,12 +2,18 @@ package server
 
 import (
 	"github.com/jonasi/http"
+	"github.com/jonasi/project/server/api"
 	"golang.org/x/net/context"
 )
 
 type ck string
 
 var serverKey = ck("github.com/jonasi/project/server.Server")
+
+var apiEndpoints = []*http.Endpoint{
+	GetVersion,
+	Shutdown,
+}
 
 func serverMiddleware(s *Server) http.Handler {
 	return http.HandlerFunc(func(c *http.Context) {
@@ -20,21 +26,15 @@ func getServer(c *http.Context) *Server {
 	return c.Context.Value(serverKey).(*Server)
 }
 
-var json = http.JSON(func(d interface{}) interface{} {
-	return map[string]interface{}{
-		"data": d,
-	}
-})
-
-var GetVersion = http.GET("/version", json,
+var GetVersion = http.GET("/version", api.JSON,
 	http.HandlerFunc(func(c *http.Context) {
-		http.JSONResponse(c, Version)
+		api.JSONResponse(c, Version, nil)
 	}),
 )
 
-var Shutdown = http.DELETE("/server", json,
+var Shutdown = http.DELETE("/server", api.JSON,
 	http.HandlerFunc(func(c *http.Context) {
 		getServer(c).Close()
-		http.JSONResponse(c, true)
+		api.JSONResponse(c, true, nil)
 	}),
 )

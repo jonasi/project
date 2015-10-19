@@ -7,20 +7,13 @@ import (
 	"time"
 
 	"github.com/jonasi/http"
+	"github.com/jonasi/project/server/brew"
 	"gopkg.in/inconshreveable/log15.v2"
 	"gopkg.in/tylerb/graceful.v1"
 )
 
 func New(stateDir string) *Server {
 	r := http.NewRouter()
-
-	r.Register(
-		ServeIndex,
-		ServeAssets,
-
-		GetVersion,
-		Shutdown,
-	)
 
 	s := &Server{
 		Logger:   log15.New(),
@@ -33,6 +26,12 @@ func New(stateDir string) *Server {
 		},
 		stopCh: make(chan struct{}),
 	}
+
+	s.registerEndpoints(
+		webEndpoints,
+		prefix("/api", apiEndpoints...),
+		prefix("/api/brew", brew.Endpoints...),
+	)
 
 	t := template.Must(template.ParseGlob("server/templates/*"))
 
@@ -50,6 +49,17 @@ type Server struct {
 	http     graceful.Server
 	stopCh   chan struct{}
 	stateDir string
+}
+
+func (s *Server) registerEndpoints(endpoints ...[]*http.Endpoint) {
+	r := s.http.Server.Handler.(*http.Router)
+
+	for _, eps := range endpoints {
+		for _, ep := range eps {
+			s.Info("Registered route", "method", ep.Method, "path", ep.Path)
+			r.Register(ep)
+		}
+	}
 }
 
 func (s *Server) Listen() error {
@@ -73,4 +83,18 @@ func logReq(l log15.Logger) http.Handler {
 	return http.Logger(func(st *http.RequestStats) {
 		l.Info("http request", "stats", st)
 	})
+}
+
+func prefix(prefix string, endpoints ...*http.Endpoint) []*http.Endpoint {
+	eps := make([]*http.Endpoint, len(endpoints))
+
+	for i, ep := range endpoints {
+		eps[i] = &http.Endpoint{
+			Method:   ep.Method,
+			Path:     prefix + ep.Path,
+			Handlers: ep.Handlers,
+		}
+	}
+
+	return eps
 }

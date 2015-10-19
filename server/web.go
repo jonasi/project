@@ -6,6 +6,11 @@ import (
 	"path"
 )
 
+var webEndpoints = []*http.Endpoint{
+	ServeIndex,
+	ServeAssets,
+}
+
 var ServeIndex = http.GET("/", http.HandlerFunc(func(c *http.Context) {
 	http.TemplateResponse(c, "index.html", nil)
 }))
