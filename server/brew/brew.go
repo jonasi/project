@@ -3,24 +3,8 @@ package brew
 // https://github.com/Homebrew/homebrew/blob/master/share/doc/homebrew/Querying-Brew.md
 
 import (
-	"encoding/json"
-	"io"
-	"os/exec"
+	"github.com/jonasi/project/server/cmd"
 )
-
-func cmd(dest interface{}, args ...string) error {
-	r, w := io.Pipe()
-	dec := json.NewDecoder(r)
-
-	cmd := exec.Command("brew", args...)
-	cmd.Stdout = w
-
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-
-	return dec.Decode(dest)
-}
 
 type Formula struct {
 	Name        string `json:"name"`
@@ -69,13 +53,34 @@ type Formula struct {
 	} `json:"bottle"`
 }
 
-func Version() (string, error) {
-	return "", nil
+type Version struct {
+	Version  string `json:"version"`
+	Revision string `json:"revision"`
+}
+
+func LocalVersion() (*Version, error) {
+	var (
+		v   Version
+		fmt = "%s (git revision %s last commit"
+	)
+
+	err := cmd.Command("brew", "--version").RunScanf(fmt, &v.Version, &v.Revision)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// strip trailing ;
+	v.Revision = v.Revision[:len(v.Revision)-1]
+
+	return &v, nil
 }
 
 func List() ([]*Formula, error) {
-	formulae := []*Formula{}
-	err := cmd(&formulae, "info", "--installed", "--json=v1")
+	var (
+		formulae = []*Formula{}
+		err      = cmd.Command("brew", "info", "--installed", "--json=v1").RunJSON(&formulae)
+	)
 
 	if err != nil {
 		return nil, err
@@ -85,8 +90,10 @@ func List() ([]*Formula, error) {
 }
 
 func Info(name string) (*Formula, error) {
-	var f []Formula
-	err := cmd(&f, "info", "--json=v1", name)
+	var (
+		f   []Formula
+		err = cmd.Command("brew", "info", "--json=v1", name).RunJSON(&f)
+	)
 
 	if err != nil {
 		return nil, err

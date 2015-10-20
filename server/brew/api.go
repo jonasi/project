@@ -6,9 +6,15 @@ import (
 )
 
 var Endpoints = []*http.Endpoint{
+	GetVersion,
 	ListFormulae,
 	GetFormula,
 }
+
+var GetVersion = http.GET("/version", api.JSON, http.HandlerFunc(func(c *http.Context) {
+	v, err := LocalVersion()
+	api.JSONResponse(c, v, err)
+}))
 
 var ListFormulae = http.GET("/formulae", api.JSON, http.HandlerFunc(func(c *http.Context) {
 	f, err := List()
