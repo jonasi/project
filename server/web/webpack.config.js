@@ -25,7 +25,7 @@ var config = module.exports = {
 
         loaders: [
             { test: /\.js$/, exclude: /node_modules/, loader: 'babel' },
-            { test: /\.css$/, exclude: /node_modules/, loader: 'style!css?modules&importLoaders!postcss' },
+            { test: /\.css$/, exclude: /node_modules/, loader: 'style!css?modules&importLoaders&localIdentName=[name]__[local]___[hash:base64:10]!postcss' },
         ],
     },
 

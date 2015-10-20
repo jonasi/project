@@ -14,11 +14,19 @@ export default class extends Component {
         return (
             <div className={ styles.container }>
                 <header className={ styles.header }>
-                    <Link to="/">Projay</Link>
+                    <h4><Link to="/">Projay</Link></h4>
                 </header>
-                <div className={ styles.content }>{
-                    this.props.children
-                }</div>
+                <div className={ styles.body }>
+                    <div className={ styles.sidebar }>
+                        <ul>
+                            <li><Link activeClassName="active" to="/brew">Brew</Link></li>
+                            <li><Link activeClassName="active" to="/system">System</Link></li>
+                        </ul>
+                    </div>
+                    <div className={ styles.content }>{
+                        this.props.children
+                    }</div>
+                </div>
             </div>
         );
     }
