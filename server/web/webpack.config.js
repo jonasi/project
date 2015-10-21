@@ -15,6 +15,7 @@ var config = module.exports = {
 
     output: {
         path: path.join(__dirname, 'public'),
+        publicPath: '/assets/',
         filename: 'app.js',
     },
 
@@ -24,8 +25,17 @@ var config = module.exports = {
         ],
 
         loaders: [
-            { test: /\.js$/, exclude: /node_modules/, loader: 'babel' },
-            { test: /\.css$/, exclude: /node_modules/, loader: 'style!css?modules&importLoaders&localIdentName=[name]__[local]___[hash:base64:10]!postcss' },
+			{ test: /\.js$/, exclude: /node_modules/, loader: 'babel' },
+			{ test: /\.css$/, exclude: /node_modules/, loader: 'style!css?modules&importLoaders&localIdentName=[name]__[local]___[hash:base64:10]!postcss' },
+			{ test: /\.woff($|\?)/, loader: 'url-loader?limit=10000' },
+			{ test: /\.woff2($|\?)/, loader: 'url-loader?limit=10000' },
+			{ test: /\.otf($|\?)/, loader: 'url-loader?limit=10000' },
+			{ test: /\.ttf($|\?)/, loader: 'url-loader?limit=10000' },
+			{ test: /\.eot($|\?)/, loader: 'url-loader?limit=10000' },
+			{ test: /\.svg($|\?)/, loader: 'url-loader?limit=10000' },
+			{ test: /\.png$/, loader: 'url-loader?limit=10000' },
+			{ test: /\.jpg$/, loader: 'url-loader?limit=10000' },
+			{ test: /\.gif$/, loader: 'url-loader?limit=10000' },
         ],
     },
 
