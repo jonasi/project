@@ -3,7 +3,8 @@ import React, { Component } from 'react';
 export default class extends Component {
     render() {
         return (
-            <div />
+            <h1>NOT IMPLEMENTED YET</h1>
         );
     }
 }
+

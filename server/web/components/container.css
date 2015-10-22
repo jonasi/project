@@ -1,7 +1,3 @@
-@import 'normalize.css';
-@import 'skeleton.css/skeleton.css'; 
-@import 'web/fonts/raleway/fonts.css';
-
 :global {
     html, body, #react-root {
         height: 100%;

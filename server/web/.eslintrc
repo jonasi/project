@@ -13,8 +13,9 @@
 
     "rules": {
         "comma-dangle": [2, "always-multiline"],
-        "strict": 0,
         "jsx-quotes": [2, "prefer-double"],
+        "strict": 0,
+        "semi": [2, "always"],
         "react/jsx-curly-spacing": [2, "always"],
         "react/jsx-no-duplicate-props": 2,
         "react/jsx-no-undef": 2,

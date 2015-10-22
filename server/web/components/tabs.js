@@ -55,7 +55,7 @@ export default class extends Component {
                             <li key={ id } className={ cls }>
                                 <Link to={ to }>{ label }</Link>
                             </li>
-                        )
+                        );
                     })
                 }</ul>
                 <div className={ styles.content }>{ active }</div>

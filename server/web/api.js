@@ -3,7 +3,7 @@ import 'whatwg-fetch';
 const { fetch } = window;
 
 function get(...args) {
-    return fetch(...args).then(d => d.json());
+    return fetch(...args).then(d => d.json()).then(d => d.data);
 }
 
 export default class BrewAPI {
