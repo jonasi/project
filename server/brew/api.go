@@ -17,7 +17,18 @@ var GetVersion = http.GET("/version", api.JSON, http.HandlerFunc(func(c *http.Co
 }))
 
 var ListFormulae = http.GET("/formulae", api.JSON, http.HandlerFunc(func(c *http.Context) {
-	f, err := List()
+	var (
+		filter = c.QueryString("filter")
+		f      []*Formula
+		err    error
+	)
+
+	if filter == "all" {
+		f, err = ListAll()
+	} else {
+		f, err = ListInstalled()
+	}
+
 	api.JSONResponse(c, f, err)
 }))
 

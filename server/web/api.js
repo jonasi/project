@@ -2,27 +2,14 @@ import 'whatwg-fetch';
 
 const { fetch } = window;
 
-function get(...args) {
-    return fetch(...args).then(d => d.json()).then(d => d.data);
-}
-
-export default class BrewAPI {
-    formula(name) {
-        return get(`/api/brew/formulae/${ name }`);
-    }
-
-    formulae() {
-        return get('/api/brew/formulae');
-    }
-}
-
-export default class SystemAPI {
-
-}
-
 export default class API {
-    constructor() {
-        this.brew = new BrewAPI();
-        this.system = new SystemAPI();
+    get(...args) {
+        return fetch(...args).then(d => d.json()).then(d => {
+            if (d.error) {
+                throw new Error(d.error);
+            }
+
+            return d.data;
+        });
     }
 }

@@ -26,7 +26,8 @@ var config = module.exports = {
 
         loaders: [
 			{ test: /\.js$/, exclude: /node_modules/, loader: 'babel' },
-			{ test: /\.css$/, loader: 'style!css?modules&importLoaders&localIdentName=[name]__[local]___[hash:base64:10]!postcss' },
+			{ test: /\.css$/, exclude: /node_modules/, loader: 'style!css?modules&importLoaders&localIdentName=[name]__[local]___[hash:base64:10]!postcss' },
+			{ test: /\.css$/, include: /node_modules/, loader: 'style!css' },
 			{ test: /\.woff($|\?)/, loader: 'url-loader?limit=10000' },
 			{ test: /\.woff2($|\?)/, loader: 'url-loader?limit=10000' },
 			{ test: /\.otf($|\?)/, loader: 'url-loader?limit=10000' },

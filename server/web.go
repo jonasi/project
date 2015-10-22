@@ -8,7 +8,7 @@ import (
 
 var clientRoutes = []string{
 	"/",
-	"/brew",
+	"/brew/*var",
 	"/system",
 }
 

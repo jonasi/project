@@ -1,10 +1,11 @@
-package cmd
+package exec
 
 import (
 	"encoding/json"
 	"fmt"
 	"io"
 	"os/exec"
+	"strings"
 )
 
 type Cmd struct {
@@ -33,6 +34,20 @@ func (c *Cmd) runHandleStdout(fn func(io.Reader) error) error {
 	}
 
 	return c.Wait()
+}
+
+func (c *Cmd) StringOutput(trim bool) (string, error) {
+	out, err := c.Output()
+
+	if err != nil {
+		return "", err
+	}
+
+	if trim {
+		return strings.TrimSpace(string(out)), nil
+	}
+
+	return string(out), nil
 }
 
 func (c *Cmd) RunJSON(dest interface{}) error {

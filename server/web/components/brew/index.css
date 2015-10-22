@@ -1,0 +1,11 @@
+.brew {
+    > a {
+        display: block;
+        padding: 4em;
+    }
+
+    table td, table th {
+        padding-left: 1em;
+        padding-right: 1em;
+    }
+}

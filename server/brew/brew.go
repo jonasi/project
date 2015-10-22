@@ -3,7 +3,11 @@ package brew
 // https://github.com/Homebrew/homebrew/blob/master/share/doc/homebrew/Querying-Brew.md
 
 import (
-	"github.com/jonasi/project/server/cmd"
+	"io/ioutil"
+	"path/filepath"
+	"strings"
+
+	"github.com/jonasi/project/server/exec"
 )
 
 type Formula struct {
@@ -64,7 +68,7 @@ func LocalVersion() (*Version, error) {
 		fmt = "%s (git revision %s last commit"
 	)
 
-	err := cmd.Command("brew", "--version").RunScanf(fmt, &v.Version, &v.Revision)
+	err := exec.Command("brew", "--version").RunScanf(fmt, &v.Version, &v.Revision)
 
 	if err != nil {
 		return nil, err
@@ -76,10 +80,31 @@ func LocalVersion() (*Version, error) {
 	return &v, nil
 }
 
-func List() ([]*Formula, error) {
+func ListAll() ([]*Formula, error) {
+	f, err := allFormulaNames()
+
+	if err != nil {
+		return nil, err
+	}
+
 	var (
 		formulae = []*Formula{}
-		err      = cmd.Command("brew", "info", "--installed", "--json=v1").RunJSON(&formulae)
+		args     = append([]string{"info", "--json=v1"}, f...)
+	)
+
+	err = exec.Command("brew", args...).RunJSON(&formulae)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return formulae, nil
+}
+
+func ListInstalled() ([]*Formula, error) {
+	var (
+		formulae = []*Formula{}
+		err      = exec.Command("brew", "info", "--installed", "--json=v1").RunJSON(&formulae)
 	)
 
 	if err != nil {
@@ -92,7 +117,7 @@ func List() ([]*Formula, error) {
 func Info(name string) (*Formula, error) {
 	var (
 		f   []Formula
-		err = cmd.Command("brew", "info", "--json=v1", name).RunJSON(&f)
+		err = exec.Command("brew", "info", "--json=v1", name).RunJSON(&f)
 	)
 
 	if err != nil {
@@ -112,4 +137,40 @@ func Upgrade(name string) (*Formula, error) {
 
 func Update() error {
 	return nil
+}
+
+func allFormulaNames() ([]string, error) {
+	d, err := dir()
+
+	if err != nil {
+		return nil, err
+	}
+
+	fi, err := ioutil.ReadDir(d)
+
+	if err != nil {
+		return nil, err
+	}
+
+	form := []string{}
+
+	for _, f := range fi {
+		n := f.Name()
+
+		if !f.IsDir() && strings.HasSuffix(n, ".rb") {
+			form = append(form, n[:len(n)-3])
+		}
+	}
+
+	return form, nil
+}
+
+func dir() (string, error) {
+	str, err := exec.Command("brew", "--prefix").StringOutput(true)
+
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(str, "Library", "Formula"), nil
 }
