@@ -35,12 +35,25 @@ func (p *Plugin) RunCmd(args []string) int {
 		http.JSONResponse(c, map[string]interface{}{"version": p.version})
 	}))
 
+	getEndpoints := http.GET("/plugin/endpoints", http.JSON(nil), http.HandlerFunc(func(c *http.Context) {
+		ep := make([]interface{}, len(p.endpoints))
+
+		for i := range p.endpoints {
+			ep[i] = map[string]string{
+				"method": p.endpoints[i].Method,
+				"path":   p.endpoints[i].Path,
+			}
+		}
+
+		http.JSONResponse(c, ep)
+	}))
+
 	if err := p.cmd.ParseArgs(args); err != nil {
 		p.Error("Parse args error", "error", err)
 		return 1
 	}
 
-	p.server.RegisterEndpoints(getVersion)
+	p.server.RegisterEndpoints(getVersion, getEndpoints)
 	p.server.RegisterEndpoints(p.endpoints...)
 
 	return p.cmd.Run()

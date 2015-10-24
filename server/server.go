@@ -48,6 +48,7 @@ type Server struct {
 	http     graceful.Server
 	stopCh   chan struct{}
 	stateDir string
+	plugins  map[string]plugin
 }
 
 func (s *Server) registerEndpoints(endpoints ...[]*http.Endpoint) {
@@ -70,14 +71,32 @@ func (s *Server) Listen() error {
 
 	s.Info("Registering plugins")
 
-	plugins := listAllPlugins()
+	s.plugins = listAllPlugins()
 
-	for _, p := range plugins {
+	for i := range s.plugins {
+		p := s.plugins[i]
 		s.Info("Plugin found", "plugin", p.name, "path", p.path)
 
 		if err := p.initialize(s.stateDir); err != nil {
 			return err
 		}
+
+		eps := make([]*http.Endpoint, len(p.endpoints))
+
+		for i := range p.endpoints {
+			prefix := "/api/plugins/" + p.name
+
+			eps[i] = &http.Endpoint{
+				Method: p.endpoints[i].Method,
+				Path:   prefix + p.endpoints[i].Path,
+				Handlers: []http.Handler{
+					http.StripPrefix(prefix),
+					&p,
+				},
+			}
+		}
+
+		s.registerEndpoints(eps)
 	}
 
 	s.Info("Starting http server", "addr", s.http.Addr)
