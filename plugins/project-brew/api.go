@@ -1,15 +1,9 @@
-package brew
+package main
 
 import (
 	"github.com/jonasi/http"
 	"github.com/jonasi/project/server/api"
 )
-
-var Endpoints = []*http.Endpoint{
-	GetVersion,
-	ListFormulae,
-	GetFormula,
-}
 
 var GetVersion = http.GET("/version", api.JSON, http.HandlerFunc(func(c *http.Context) {
 	v, err := LocalVersion()

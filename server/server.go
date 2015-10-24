@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/jonasi/http"
-	"github.com/jonasi/project/server/brew"
+	"github.com/jonasi/project/server/middleware"
 	"gopkg.in/inconshreveable/log15.v2"
 	"gopkg.in/tylerb/graceful.v1"
 )
@@ -30,13 +30,12 @@ func New(stateDir string) *Server {
 	s.registerEndpoints(
 		webEndpoints,
 		prefix("/api", apiEndpoints...),
-		prefix("/api/brew", brew.Endpoints...),
 	)
 
 	t := template.Must(template.ParseGlob("server/templates/*"))
 
 	r.AddGlobalHandler(
-		logReq(s.Logger),
+		middleware.LogRequest(s.Logger),
 		serverMiddleware(s),
 		http.Template(t),
 	)
@@ -69,6 +68,18 @@ func (s *Server) Listen() error {
 		return err
 	}
 
+	s.Info("Registering plugins")
+
+	plugins := listAllPlugins()
+
+	for _, p := range plugins {
+		s.Info("Plugin found", "plugin", p.name, "path", p.path)
+
+		if err := p.initialize(s.stateDir); err != nil {
+			return err
+		}
+	}
+
 	s.Info("Starting http server", "addr", s.http.Addr)
 
 	return s.http.ListenAndServe()
@@ -77,12 +88,6 @@ func (s *Server) Listen() error {
 func (s *Server) Close() {
 	s.Info("Stopping http server")
 	s.http.Stop(time.Second)
-}
-
-func logReq(l log15.Logger) http.Handler {
-	return http.Logger(func(st *http.RequestStats) {
-		l.Info("http request", "stats", st)
-	})
 }
 
 func prefix(prefix string, endpoints ...*http.Endpoint) []*http.Endpoint {

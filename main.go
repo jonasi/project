@@ -49,7 +49,7 @@ func runServer(stateDir string) {
 	s := server.New(stateDir)
 
 	if err := s.Listen(); err != nil {
-		fmt.Fprintln(os.Stderr, "Server err: %s", err)
+		fmt.Fprintf(os.Stderr, "Server err: %s\n", err)
 		os.Exit(1)
 	}
 

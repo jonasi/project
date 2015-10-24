@@ -1,11 +1,20 @@
-.PHONY: npm js js_watch
+.PHONY: npm js js_watch server plugins
 
 SHELL:=bash
 ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 WEB_DIR:=$(ROOT_DIR)/server/web
-PATH:=$(WEB_DIR)/node_modules/.bin:$(PATH)
+
+GOBIN=$(ROOT_DIR)/bin
+GOENV=GOBIN=$(GOBIN)
+
+PATH:=$(GOBIN):$(WEB_DIR)/node_modules/.bin:$(PATH)
 
 DEBUG=1
+
+clean:
+	$(GOENV) go clean -r -i github.com/jonasi/project/...
+	rm -rf $(GOBIN)/*
+	rm -rf $(WEB_DIR)/public/*
 
 npm_install:
 	cd $(WEB_DIR) && npm install
@@ -15,3 +24,9 @@ js:
 
 js_watch:
 	$(MAKE) js WEBPACK_ARGS=--watch
+
+server:
+	$(GOENV) time go install -v
+
+plugins:
+	$(GOENV) time go install -v ./plugins/...

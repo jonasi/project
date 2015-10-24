@@ -1,4 +1,4 @@
-package brew
+package main
 
 // https://github.com/Homebrew/homebrew/blob/master/share/doc/homebrew/Querying-Brew.md
 

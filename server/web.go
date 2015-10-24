@@ -8,8 +8,6 @@ import (
 
 var clientRoutes = []string{
 	"/",
-	"/brew/*var",
-	"/system",
 }
 
 var webEndpoints = append(
