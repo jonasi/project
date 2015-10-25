@@ -1,11 +1,11 @@
 import { brew } from './index.css';
 import React, { Component, PropTypes } from 'react';
 
-import api from 'web/components/api';
-import Tabs, { Tab } from 'web/components/tabs';
+import { hoc as api } from 'web/common/api';
+import Tabs, { Tab } from 'web/common/components/tabs';
 import { Link } from 'react-router';
 
-import brewImgURL from 'web/img/brew.png';
+import brewImgURL from '../img/brew.png';
 
 const { object } = PropTypes;
 
@@ -28,7 +28,7 @@ export default class extends Component {
 @api({
     formulae: {
         initialValue: [],
-        path: () => '/api/brew/formulae?filter=installed',
+        path: () => '/plugins/brew/api/formulae?filter=installed',
     },
 })
 class Installed extends Component {
@@ -45,7 +45,7 @@ class Installed extends Component {
 @api({
     formulae: {
         initialValue: [],
-        path: () => '/api/brew/formulae?filter=all',
+        path: () => '/plugins/brew/api/formulae?filter=all',
     },
 })
 class All extends Component {
@@ -54,7 +54,7 @@ class All extends Component {
     }
 
     render() {
-        const { formulae } = this.state;
+        const { formulae } = this.props;
         return <FormulaTable formulae={ formulae } />;
     }
 }
@@ -85,7 +85,7 @@ class FormulaTable extends Component {
 
                         return (
                             <tr key={ f.name }>
-                                <td><Link to={ `/brew/${ f.name }` }>{ f.name }</Link></td>
+                                <td><Link to={ `/plugins/brew/web/${ f.name }` }>{ f.name }</Link></td>
                                 <td>{ f.desc }</td>
                                 <td><a target="_blank" href={ f.homepage }>Homepage</a></td>
                                 <td>{ version }</td>

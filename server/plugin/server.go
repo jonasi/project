@@ -4,34 +4,37 @@ import (
 	"github.com/jonasi/http"
 	"github.com/jonasi/project/server/middleware"
 	"gopkg.in/inconshreveable/log15.v2"
+	"html/template"
 	"net"
 	nethttp "net/http"
 )
 
 func NewServer(l log15.Logger) *Server {
-	r := http.NewRouter()
-
-	r.AddGlobalHandler(
-		middleware.LogRequest(l),
-	)
-
-	return &Server{
+	s := &Server{
 		Logger: l,
 		http: &nethttp.Server{
-			Handler: r,
+			Handler: http.NewRouter(),
 		},
 	}
+
+	t := template.Must(template.ParseGlob("server/templates/*"))
+
+	s.Router().AddGlobalHandler(
+		middleware.LogRequest(l),
+		http.Template(t),
+	)
+
+	return s
 }
 
 type Server struct {
 	log15.Logger
-	Addr string
 	http *nethttp.Server
 }
 
-func (s *Server) Listen() error {
-	s.Info("Initializing http server", "location", s.Addr)
-	l, err := net.Listen("unix", s.Addr)
+func (s *Server) Listen(addr string) error {
+	s.Info("Initializing http server", "location", addr)
+	l, err := net.Listen("unix", addr)
 
 	if err != nil {
 		return err
@@ -40,11 +43,15 @@ func (s *Server) Listen() error {
 	return s.http.Serve(l)
 }
 
-func (s *Server) RegisterEndpoints(endpoints ...*http.Endpoint) {
+func (s *Server) Router() *http.Router {
+	return s.http.Handler.(*http.Router)
+}
+
+func (s *Server) RegisterEndpoints(endpoints ...http.Endpoint) {
 	r := s.http.Handler.(*http.Router)
 
 	for _, ep := range endpoints {
 		r.Register(ep)
-		s.Info("Registered route", "method", ep.Method, "path", ep.Path)
+		s.Info("Registered route", "method", ep.Methods(), "path", ep.Paths())
 	}
 }

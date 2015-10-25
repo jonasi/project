@@ -1,13 +1,13 @@
 import React, { Component, PropTypes } from 'react';
 
-import api from 'web/components/api';
+import { hoc as api } from 'web/common/api';
 
 const { object } = PropTypes;
 
 @api({
     formula: {
         initialValue: {},
-        path: props => `/api/brew/formulae/${ props.params.name }`,
+        path: props => `/plugins/brew/api/formulae/${ props.params.formula }`,
     },
 })
 export default class extends Component {

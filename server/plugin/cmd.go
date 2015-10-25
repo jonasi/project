@@ -73,8 +73,7 @@ func (c *Cmd) Run() int {
 	}
 
 	if c.flags.location != "" {
-		c.Server.Addr = c.flags.location
-		if err := c.Server.Listen(); err != nil {
+		if err := c.Server.Listen(c.flags.location); err != nil {
 			c.Error("Server error", "error", err)
 			return 1
 		}

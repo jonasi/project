@@ -5,12 +5,12 @@ import (
 	"github.com/jonasi/project/server/api"
 )
 
-var GetVersion = http.GET("/version", api.JSON, http.HandlerFunc(func(c *http.Context) {
+var GetVersion = http.GET("/api/version", api.JSON, http.HandlerFunc(func(c *http.Context) {
 	v, err := LocalVersion()
 	api.JSONResponse(c, v, err)
 }))
 
-var ListFormulae = http.GET("/formulae", api.JSON, http.HandlerFunc(func(c *http.Context) {
+var ListFormulae = http.GET("/api/formulae", api.JSON, http.HandlerFunc(func(c *http.Context) {
 	var (
 		filter = c.QueryString("filter")
 		f      []*Formula
@@ -26,7 +26,7 @@ var ListFormulae = http.GET("/formulae", api.JSON, http.HandlerFunc(func(c *http
 	api.JSONResponse(c, f, err)
 }))
 
-var GetFormula = http.GET("/formulae/:formula", api.JSON, http.HandlerFunc(func(c *http.Context) {
+var GetFormula = http.GET("/api/formulae/:formula", api.JSON, http.HandlerFunc(func(c *http.Context) {
 	name := c.Params.ByName("formula")
 	f, err := Info(name)
 

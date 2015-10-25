@@ -2,7 +2,7 @@
 
 SHELL:=bash
 ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-WEB_DIR:=$(ROOT_DIR)/server/web
+WEB_DIR:=$(ROOT_DIR)/web
 
 GOBIN=$(ROOT_DIR)/bin
 GOENV=GOBIN=$(GOBIN)
@@ -20,7 +20,7 @@ npm_install:
 	cd $(WEB_DIR) && npm install
 
 js:
-	NODE_ENV=$(if $(DEBUG),development,production) webpack --config $(WEB_DIR)/webpack.config.js --progress --colors --display-error-details $(WEBPACK_ARGS)
+	NODE_ENV=$(if $(DEBUG),development,production) webpack --config $(WEB_DIR)/app/webpack.config.js --progress --colors --display-error-details $(WEBPACK_ARGS)
 
 js_watch:
 	$(MAKE) js WEBPACK_ARGS=--watch

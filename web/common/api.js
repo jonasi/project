@@ -1,9 +1,47 @@
+import 'whatwg-fetch';
+
 import React, { Component, PropTypes } from 'react';
 import { Record, Map } from 'immutable';
 
 const { object } = PropTypes;
 
-export default function(vals) {
+const { fetch } = window;
+
+export default class API {
+    get(...args) {
+        return fetch(...args).then(d => d.json()).then(d => {
+            if (d.error) {
+                throw new Error(d.error);
+            }
+
+            return d.data;
+        });
+    }
+}
+
+export function loadPlugin(name) {
+    return new Promise(resolve => {
+        const cbName = `__plugin_${ name }__`;
+
+        const head = document.getElementsByTagName('head')[0];
+        let script = null;
+
+        window[cbName] = function(exports) {
+            delete window[cbName];
+
+            head.removeChild(script);
+            resolve(exports);
+        };
+
+        script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.charset = 'utf-8';
+        script.src = `/plugins/${ name }/assets/plugin.js`;
+        head.appendChild(script);
+    });
+}
+
+export function hoc(vals) {
     return c => comp(c, vals);
 }
 

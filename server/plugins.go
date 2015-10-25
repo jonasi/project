@@ -6,10 +6,8 @@ import (
 	"github.com/jonasi/http"
 	"io"
 	"io/ioutil"
-	"net"
 	nethttp "net/http"
 	"net/http/httputil"
-	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -18,28 +16,21 @@ import (
 	"time"
 )
 
-var localURL, _ = url.Parse("http://whocares.whatever")
-
 type pluginEndpoint struct {
 	Method string `json:"method"`
 	Path   string `json:"path"`
 }
 
 type plugin struct {
-	name      string
-	path      string
-	client    *nethttp.Client
-	proxy     *httputil.ReverseProxy
-	endpoints []pluginEndpoint
-	version   string
-}
-
-func (p *plugin) Handle(c *http.Context) {
-	p.proxy.ServeHTTP(c.Writer, c.Request)
+	name    string
+	path    string
+	client  *nethttp.Client
+	proxy   *httputil.ReverseProxy
+	version string
 }
 
 func (p *plugin) req(dest interface{}, method, path string, body io.Reader) error {
-	req, err := nethttp.NewRequest(method, "http://whocares.whatever"+path, body)
+	req, err := nethttp.NewRequest(method, sockHTTPURL.String()+path, body)
 
 	if err != nil {
 		return err
@@ -72,9 +63,8 @@ func (p *plugin) initialize(stateDir string) error {
 		return err
 	}
 
-	p.client = localClient(path)
-	p.proxy = httputil.NewSingleHostReverseProxy(localURL)
-	p.proxy.Transport = p.client.Transport
+	p.client = sockHTTPClient(path)
+	p.proxy = sockHTTPReverseProxy(path, "/plugins/"+p.name)
 
 	var (
 		waitCh = make(chan error)
@@ -96,16 +86,7 @@ func (p *plugin) initialize(stateDir string) error {
 				}
 			}
 
-			if p.endpoints == nil {
-				var ep []pluginEndpoint
-				_ = p.req(&ep, "GET", "/plugin/endpoints", nil)
-
-				if ep != nil {
-					p.endpoints = ep
-				}
-			}
-
-			if p.version != "" && p.endpoints != nil {
+			if p.version != "" {
 				initCh <- struct{}{}
 				break
 			}
@@ -128,10 +109,20 @@ func (p *plugin) initialize(stateDir string) error {
 	return nil
 }
 
-func listAllPlugins() map[string]plugin {
+func (p *plugin) Endpoint() http.Endpoint {
+	prefix := "/plugins/" + p.name
+
+	return http.ALL(
+		prefix+"/*splat",
+		http.StripPrefix(prefix),
+		http.FromHTTPHandler(p.proxy),
+	)
+}
+
+func listAllPlugins() map[string]*plugin {
 	var (
 		paths   = strings.Split(os.Getenv("PATH"), ":")
-		plugins = map[string]plugin{}
+		plugins = map[string]*plugin{}
 	)
 
 	for _, p := range paths {
@@ -166,7 +157,7 @@ func listAllPlugins() map[string]plugin {
 					continue
 				}
 
-				plugins[n] = plugin{
+				plugins[n] = &plugin{
 					name: n,
 					path: filepath.Join(p, fi.Name()),
 				}
@@ -175,14 +166,4 @@ func listAllPlugins() map[string]plugin {
 	}
 
 	return plugins
-}
-
-func localClient(sock string) *nethttp.Client {
-	return &nethttp.Client{
-		Transport: &nethttp.Transport{
-			Dial: func(proto, addr string) (net.Conn, error) {
-				return net.Dial("unix", sock)
-			},
-		},
-	}
 }

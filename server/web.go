@@ -1,33 +1,31 @@
 package server
 
 import (
-	"github.com/jonasi/http"
 	nethttp "net/http"
 	"path"
+
+	"github.com/jonasi/http"
 )
 
-var clientRoutes = []string{
-	"/",
-}
-
-var webEndpoints = append(
-	serveIndex(clientRoutes...),
+var webEndpoints = []http.Endpoint{
+	ServeIndex,
+	ServeWeb,
 	ServeAssets,
-)
-
-func serveIndex(routes ...string) []*http.Endpoint {
-	eps := make([]*http.Endpoint, len(routes))
-
-	for i, rt := range routes {
-		eps[i] = http.GET(rt, http.HandlerFunc(func(c *http.Context) {
-			http.TemplateResponse(c, "index.html", nil)
-		}))
-	}
-
-	return eps
 }
+
+var ServeIndex = http.GET("/", http.Redirect("/web"))
+
+var ServeWeb = http.GET("/web/*splat", http.HandlerFunc(func(c *http.Context) {
+	http.TemplateResponse(c, "index.html", map[string]interface{}{
+		"script": "/assets/app.js",
+	})
+}))
 
 var ServeAssets = http.GET("/assets/*asset", http.HandlerFunc(func(c *http.Context) {
-	p := path.Join("server", "web", "public", c.Params.ByName("asset"))
+	var (
+		n = c.Params.ByName("asset")
+		p = path.Join("web", "app", "public", n)
+	)
+
 	nethttp.ServeFile(c.Writer, c.Request, p)
 }))

@@ -1,37 +1,26 @@
-import 'normalize.css';
-import 'skeleton.css/skeleton.css'; 
-import 'web/fonts/raleway/fonts.css';
-
 import styles from './container.css';
 import React, { Component, PropTypes } from 'react';
+import { hoc as api } from 'web/common/api';
 
 import { Link } from 'react-router';
 
-const { node } = PropTypes;
+const { node, object } = PropTypes;
 
-const sidebar = [
-    ['Brew', '/brew'],
-    ['System', '/system'],
-    ['Github', '/github'],
-    ['BitBucket', '/bitbucket'],
-    ['Go', '/go'],
-    ['PHP', '/php'],
-    ['Ruby', '/ruby'],
-    ['Java', '/java'],
-    ['Javascript', '/javascript'],
-    ['Python', '/python'],
-    ['C', '/c'],
-    ['C++', '/cplusplus'],
-    ['C#', '/csharp'],
-    ['Perl', '/perl'],
-];
-
+@api({
+    plugins: {
+        initialValue: [],
+        path: () => '/api/plugins',
+    },
+})
 export default class extends Component {
     static propTypes = {
         children: node,
+        plugins: object,
     }
 
     render() {
+        const { plugins } = this.props;
+
         return (
             <div className={ styles.container }>
                 <header className={ styles.header }>
@@ -40,9 +29,9 @@ export default class extends Component {
                 <div className={ styles.body }>
                     <div className={ styles.sidebar }>
                         <ul>{
-                            sidebar.map(([ name, to ]) => (
-                                <li>
-                                    <Link activeClassName="active" to={ to } >{ name }</Link>
+                            plugins.value.map(({ name }) => (
+                                <li key={ name }>
+                                    <Link activeClassName="active" to={ `/web/global/plugin/${ name }` } >{ name }</Link>
                                 </li>
                             ))
                         }</ul>

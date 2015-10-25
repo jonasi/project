@@ -29,7 +29,7 @@ func New(stateDir string) *Server {
 
 	s.registerEndpoints(
 		webEndpoints,
-		prefix("/api", apiEndpoints...),
+		http.Prefix("/api", apiEndpoints...),
 	)
 
 	t := template.Must(template.ParseGlob("server/templates/*"))
@@ -48,15 +48,15 @@ type Server struct {
 	http     graceful.Server
 	stopCh   chan struct{}
 	stateDir string
-	plugins  map[string]plugin
+	plugins  map[string]*plugin
 }
 
-func (s *Server) registerEndpoints(endpoints ...[]*http.Endpoint) {
+func (s *Server) registerEndpoints(endpoints ...[]http.Endpoint) {
 	r := s.http.Server.Handler.(*http.Router)
 
 	for _, eps := range endpoints {
 		for _, ep := range eps {
-			s.Info("Registered route", "method", ep.Method, "path", ep.Path)
+			s.Info("Registered route", "method", ep.Methods(), "path", ep.Paths())
 			r.Register(ep)
 		}
 	}
@@ -73,30 +73,14 @@ func (s *Server) Listen() error {
 
 	s.plugins = listAllPlugins()
 
-	for i := range s.plugins {
-		p := s.plugins[i]
+	for _, p := range s.plugins {
 		s.Info("Plugin found", "plugin", p.name, "path", p.path)
 
 		if err := p.initialize(s.stateDir); err != nil {
 			return err
 		}
 
-		eps := make([]*http.Endpoint, len(p.endpoints))
-
-		for i := range p.endpoints {
-			prefix := "/api/plugins/" + p.name
-
-			eps[i] = &http.Endpoint{
-				Method: p.endpoints[i].Method,
-				Path:   prefix + p.endpoints[i].Path,
-				Handlers: []http.Handler{
-					http.StripPrefix(prefix),
-					&p,
-				},
-			}
-		}
-
-		s.registerEndpoints(eps)
+		s.registerEndpoints([]http.Endpoint{p.Endpoint()})
 	}
 
 	s.Info("Starting http server", "addr", s.http.Addr)
@@ -107,18 +91,4 @@ func (s *Server) Listen() error {
 func (s *Server) Close() {
 	s.Info("Stopping http server")
 	s.http.Stop(time.Second)
-}
-
-func prefix(prefix string, endpoints ...*http.Endpoint) []*http.Endpoint {
-	eps := make([]*http.Endpoint, len(endpoints))
-
-	for i, ep := range endpoints {
-		eps[i] = &http.Endpoint{
-			Method:   ep.Method,
-			Path:     prefix + ep.Path,
-			Handlers: ep.Handlers,
-		}
-	}
-
-	return eps
 }
