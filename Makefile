@@ -30,3 +30,10 @@ server:
 
 plugins:
 	$(GOENV) time go install -v ./plugins/...
+
+plugin_js_%_watch:
+	$(MAKE) plugin_js_$* WEBPACK_ARGS=--watch
+
+plugin_js_%:
+	NODE_ENV=$(if $(DEBUG),development,production) webpack --config $(ROOT_DIR)/plugins/project-$*/web/webpack.config.js --progress --colors --display-error-details $(WEBPACK_ARGS)
+

@@ -65,7 +65,7 @@ func getPlugin(c *mohttp.Context) *Plugin {
 	return c.Context.Value(pluginKey).(*Plugin)
 }
 
-var getVersion = mohttp.GET("/plugin/version", mohttp.JSON(nil), mohttp.HandlerFunc(func(c *mohttp.Context) {
+var getVersion = mohttp.GET("/version", mohttp.JSON(nil), mohttp.HandlerFunc(func(c *mohttp.Context) {
 	p := getPlugin(c)
 	mohttp.JSONResponse(c, map[string]interface{}{"version": p.version})
 }))

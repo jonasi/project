@@ -3,7 +3,7 @@ import styles from './tabs.css';
 import React, { Component, PropTypes, Children } from 'react';
 import classnames from 'classnames';
 
-import { Link } from 'react-router';
+import Link from 'web/common/components/link';
 
 const { node, string, object, func } = PropTypes;
 

@@ -79,7 +79,7 @@ func (p *plugin) initialize(stateDir string) error {
 		for {
 			if p.version == "" {
 				var v map[string]string
-				_ = p.req(&v, "GET", "/plugin/version", nil)
+				_ = p.req(&v, "GET", "/version", nil)
 
 				if v != nil && v["version"] != "" {
 					p.version = v["version"]

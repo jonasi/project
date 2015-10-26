@@ -2,7 +2,7 @@ import styles from './container.css';
 import React, { Component, PropTypes } from 'react';
 import { hoc as api } from 'web/common/api';
 
-import { Link } from 'react-router';
+import Link from 'web/common/components/link';
 
 const { node, object } = PropTypes;
 
@@ -31,7 +31,7 @@ export default class extends Component {
                         <ul>{
                             plugins.value.map(({ name }) => (
                                 <li key={ name }>
-                                    <Link activeClassName="active" to={ `/web/global/plugin/${ name }` } >{ name }</Link>
+                                    <Link activeClassName="active" to={ `/web/global/plugins/${ name }` } >{ name }</Link>
                                 </li>
                             ))
                         }</ul>

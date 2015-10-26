@@ -1,6 +1,5 @@
 /* eslint-env node */
 
-var webpack = require('../../../web/build/webpack');
+var webpack = require('../../../web/build/plugin');
 
-var config = module.exports = webpack.baseConfig(__dirname);
-config.output.publicPath = '/plugins/brew/assets/';
+module.exports = webpack.pluginConfig(__dirname, 'brew');

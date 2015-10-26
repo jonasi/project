@@ -3,7 +3,7 @@ import React, { Component, PropTypes } from 'react';
 
 import { hoc as api } from 'web/common/api';
 import Tabs, { Tab } from 'web/common/components/tabs';
-import { Link } from 'react-router';
+import Link from 'web/common/components/link';
 
 import brewImgURL from '../img/brew.png';
 
