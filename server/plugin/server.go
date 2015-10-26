@@ -1,19 +1,19 @@
 package plugin
 
 import (
-	"github.com/jonasi/http"
+	"github.com/jonasi/mohttp"
 	"github.com/jonasi/project/server/middleware"
 	"gopkg.in/inconshreveable/log15.v2"
 	"html/template"
 	"net"
-	nethttp "net/http"
+	"net/http"
 )
 
 func NewServer(l log15.Logger) *Server {
 	s := &Server{
 		Logger: l,
-		http: &nethttp.Server{
-			Handler: http.NewRouter(),
+		http: &http.Server{
+			Handler: mohttp.NewRouter(),
 		},
 	}
 
@@ -21,7 +21,7 @@ func NewServer(l log15.Logger) *Server {
 
 	s.Router().AddGlobalHandler(
 		middleware.LogRequest(l),
-		http.Template(t),
+		mohttp.Template(t),
 	)
 
 	return s
@@ -29,7 +29,7 @@ func NewServer(l log15.Logger) *Server {
 
 type Server struct {
 	log15.Logger
-	http *nethttp.Server
+	http *http.Server
 }
 
 func (s *Server) Listen(addr string) error {
@@ -43,12 +43,12 @@ func (s *Server) Listen(addr string) error {
 	return s.http.Serve(l)
 }
 
-func (s *Server) Router() *http.Router {
-	return s.http.Handler.(*http.Router)
+func (s *Server) Router() *mohttp.Router {
+	return s.http.Handler.(*mohttp.Router)
 }
 
-func (s *Server) RegisterEndpoints(endpoints ...http.Endpoint) {
-	r := s.http.Handler.(*http.Router)
+func (s *Server) RegisterEndpoints(endpoints ...mohttp.Endpoint) {
+	r := s.http.Handler.(*mohttp.Router)
 
 	for _, ep := range endpoints {
 		r.Register(ep)

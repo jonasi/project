@@ -2,24 +2,24 @@ package server
 
 import (
 	"html/template"
-	httpserver "net/http"
+	"net/http"
 	"os"
 	"time"
 
-	"github.com/jonasi/http"
+	"github.com/jonasi/mohttp"
 	"github.com/jonasi/project/server/middleware"
 	"gopkg.in/inconshreveable/log15.v2"
 	"gopkg.in/tylerb/graceful.v1"
 )
 
 func New(stateDir string) *Server {
-	r := http.NewRouter()
+	r := mohttp.NewRouter()
 
 	s := &Server{
 		Logger:   log15.New(),
 		stateDir: stateDir,
 		http: graceful.Server{
-			Server: &httpserver.Server{
+			Server: &http.Server{
 				Addr:    ":40000",
 				Handler: r,
 			},
@@ -29,7 +29,7 @@ func New(stateDir string) *Server {
 
 	s.registerEndpoints(
 		webEndpoints,
-		http.Prefix("/api", apiEndpoints...),
+		mohttp.Prefix("/api", apiEndpoints...),
 	)
 
 	t := template.Must(template.ParseGlob("server/templates/*"))
@@ -37,7 +37,7 @@ func New(stateDir string) *Server {
 	r.AddGlobalHandler(
 		middleware.LogRequest(s.Logger),
 		serverMiddleware(s),
-		http.Template(t),
+		mohttp.Template(t),
 	)
 
 	return s
@@ -51,8 +51,8 @@ type Server struct {
 	plugins  map[string]*plugin
 }
 
-func (s *Server) registerEndpoints(endpoints ...[]http.Endpoint) {
-	r := s.http.Server.Handler.(*http.Router)
+func (s *Server) registerEndpoints(endpoints ...[]mohttp.Endpoint) {
+	r := s.http.Server.Handler.(*mohttp.Router)
 
 	for _, eps := range endpoints {
 		for _, ep := range eps {
@@ -80,7 +80,7 @@ func (s *Server) Listen() error {
 			return err
 		}
 
-		s.registerEndpoints([]http.Endpoint{p.Endpoint()})
+		s.registerEndpoints([]mohttp.Endpoint{p.Endpoint()})
 	}
 
 	s.Info("Starting http server", "addr", s.http.Addr)

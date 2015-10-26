@@ -1,10 +1,10 @@
 package plugin
 
 import (
-	"github.com/jonasi/http"
+	"github.com/jonasi/mohttp"
 	"golang.org/x/net/context"
 	"gopkg.in/inconshreveable/log15.v2"
-	nethttp "net/http"
+	"net/http"
 	"path"
 )
 
@@ -18,7 +18,7 @@ func New(name, version string) *Plugin {
 		Logger:    l,
 		name:      name,
 		version:   version,
-		endpoints: []http.Endpoint{},
+		endpoints: []mohttp.Endpoint{},
 		server:    s,
 		cmd:       NewCmd(l, s, version),
 	}
@@ -28,7 +28,7 @@ type Plugin struct {
 	log15.Logger
 	name      string
 	version   string
-	endpoints []http.Endpoint
+	endpoints []mohttp.Endpoint
 	server    *Server
 	cmd       *Cmd
 }
@@ -46,7 +46,7 @@ func (p *Plugin) RunCmd(args []string) int {
 	return p.cmd.Run()
 }
 
-func (p *Plugin) RegisterEndpoints(endpoints ...http.Endpoint) {
+func (p *Plugin) RegisterEndpoints(endpoints ...mohttp.Endpoint) {
 	p.endpoints = append(p.endpoints, endpoints...)
 }
 
@@ -54,33 +54,33 @@ type ck string
 
 var pluginKey = ck("github.com/jonasi/project/plugin.Plugin")
 
-func pluginMiddleware(p *Plugin) http.Handler {
-	return http.HandlerFunc(func(c *http.Context) {
+func pluginMiddleware(p *Plugin) mohttp.Handler {
+	return mohttp.HandlerFunc(func(c *mohttp.Context) {
 		c.Context = context.WithValue(c.Context, pluginKey, p)
 		c.Next.Handle(c)
 	})
 }
 
-func getPlugin(c *http.Context) *Plugin {
+func getPlugin(c *mohttp.Context) *Plugin {
 	return c.Context.Value(pluginKey).(*Plugin)
 }
 
-var getVersion = http.GET("/plugin/version", http.JSON(nil), http.HandlerFunc(func(c *http.Context) {
+var getVersion = mohttp.GET("/plugin/version", mohttp.JSON(nil), mohttp.HandlerFunc(func(c *mohttp.Context) {
 	p := getPlugin(c)
-	http.JSONResponse(c, map[string]interface{}{"version": p.version})
+	mohttp.JSONResponse(c, map[string]interface{}{"version": p.version})
 }))
 
-var getAsset = http.GET("/assets/*asset", http.HandlerFunc(func(c *http.Context) {
+var getAsset = mohttp.GET("/assets/*asset", mohttp.HandlerFunc(func(c *mohttp.Context) {
 	p := getPlugin(c)
 	path := path.Join("plugins", "project-"+p.name, "web", "public", c.Params.ByName("asset"))
-	nethttp.ServeFile(c.Writer, c.Request, path)
+	http.ServeFile(c.Writer, c.Request, path)
 }))
 
-var getIndex = http.GET("/", http.Redirect("web"))
+var getIndex = mohttp.GET("/", mohttp.Redirect("web"))
 
-var getWeb = http.GET("/web/*web", http.HandlerFunc(func(c *http.Context) {
+var getWeb = mohttp.GET("/web/*web", mohttp.HandlerFunc(func(c *mohttp.Context) {
 	p := getPlugin(c)
-	http.TemplateResponse(c, "index.html", map[string]interface{}{
+	mohttp.TemplateResponse(c, "index.html", map[string]interface{}{
 		"script": "/plugins/" + p.name + "/assets/app.js",
 	})
 }))

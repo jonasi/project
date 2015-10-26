@@ -2,7 +2,7 @@ package server
 
 import (
 	"net"
-	nethttp "net/http"
+	"net/http"
 	"net/http/httputil"
 	"net/url"
 )
@@ -15,20 +15,20 @@ func dialer(sock string) func(network, addr string) (net.Conn, error) {
 	}
 }
 
-func sockHTTPClient(sock string) *nethttp.Client {
-	return &nethttp.Client{
-		Transport: &nethttp.Transport{
+func sockHTTPClient(sock string) *http.Client {
+	return &http.Client{
+		Transport: &http.Transport{
 			Dial: dialer(sock),
 		},
 	}
 }
 
 type rpTripper struct {
-	trp    *nethttp.Transport
+	trp    *http.Transport
 	prefix string
 }
 
-func (rt *rpTripper) RoundTrip(r *nethttp.Request) (*nethttp.Response, error) {
+func (rt *rpTripper) RoundTrip(r *http.Request) (*http.Response, error) {
 	resp, err := rt.trp.RoundTrip(r)
 
 	if err != nil {
@@ -48,7 +48,7 @@ func sockHTTPReverseProxy(sock, prefix string) *httputil.ReverseProxy {
 
 	p.Transport = &rpTripper{
 		prefix: prefix,
-		trp: &nethttp.Transport{
+		trp: &http.Transport{
 			Dial: dialer(sock),
 		},
 	}

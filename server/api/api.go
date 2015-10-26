@@ -1,23 +1,23 @@
 package api
 
 import (
-	"github.com/jonasi/http"
+	"github.com/jonasi/mohttp"
 )
 
-var JSON = http.JSON(func(d interface{}) interface{} {
+var JSON = mohttp.JSON(func(d interface{}) interface{} {
 	return d
 })
 
-func JSONResponse(c *http.Context, data interface{}, err error) {
+func JSONResponse(c *mohttp.Context, data interface{}, err error) {
 	if err != nil {
-		http.JSONResponse(c, map[string]interface{}{
+		mohttp.JSONResponse(c, map[string]interface{}{
 			"error": err.Error(),
 		})
 
 		return
 	}
 
-	http.JSONResponse(c, map[string]interface{}{
+	mohttp.JSONResponse(c, map[string]interface{}{
 		"data": data,
 	})
 }

@@ -1,12 +1,12 @@
 package middleware
 
 import (
-	"github.com/jonasi/http"
+	"github.com/jonasi/mohttp"
 	"gopkg.in/inconshreveable/log15.v2"
 )
 
-func LogRequest(l log15.Logger) http.Handler {
-	return http.Logger(func(st *http.RequestStats) {
+func LogRequest(l log15.Logger) mohttp.Handler {
+	return mohttp.Logger(func(st *mohttp.RequestStats) {
 		l.Info("HTTP Request",
 			"start_time", st.StartTime,
 			"protocol", st.Protocol,

@@ -1,16 +1,16 @@
 package main
 
 import (
-	"github.com/jonasi/http"
+	"github.com/jonasi/mohttp"
 	"github.com/jonasi/project/server/api"
 )
 
-var GetVersion = http.GET("/api/version", api.JSON, http.HandlerFunc(func(c *http.Context) {
+var GetVersion = mohttp.GET("/api/version", api.JSON, mohttp.HandlerFunc(func(c *mohttp.Context) {
 	v, err := LocalVersion()
 	api.JSONResponse(c, v, err)
 }))
 
-var ListFormulae = http.GET("/api/formulae", api.JSON, http.HandlerFunc(func(c *http.Context) {
+var ListFormulae = mohttp.GET("/api/formulae", api.JSON, mohttp.HandlerFunc(func(c *mohttp.Context) {
 	var (
 		filter = c.QueryString("filter")
 		f      []*Formula
@@ -26,7 +26,7 @@ var ListFormulae = http.GET("/api/formulae", api.JSON, http.HandlerFunc(func(c *
 	api.JSONResponse(c, f, err)
 }))
 
-var GetFormula = http.GET("/api/formulae/:formula", api.JSON, http.HandlerFunc(func(c *http.Context) {
+var GetFormula = mohttp.GET("/api/formulae/:formula", api.JSON, mohttp.HandlerFunc(func(c *mohttp.Context) {
 	name := c.Params.ByName("formula")
 	f, err := Info(name)
 

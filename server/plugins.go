@@ -3,10 +3,10 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jonasi/http"
+	"github.com/jonasi/mohttp"
 	"io"
 	"io/ioutil"
-	nethttp "net/http"
+	"net/http"
 	"net/http/httputil"
 	"os"
 	"os/exec"
@@ -24,13 +24,13 @@ type pluginEndpoint struct {
 type plugin struct {
 	name    string
 	path    string
-	client  *nethttp.Client
+	client  *http.Client
 	proxy   *httputil.ReverseProxy
 	version string
 }
 
 func (p *plugin) req(dest interface{}, method, path string, body io.Reader) error {
-	req, err := nethttp.NewRequest(method, sockHTTPURL.String()+path, body)
+	req, err := http.NewRequest(method, sockHTTPURL.String()+path, body)
 
 	if err != nil {
 		return err
@@ -109,13 +109,13 @@ func (p *plugin) initialize(stateDir string) error {
 	return nil
 }
 
-func (p *plugin) Endpoint() http.Endpoint {
+func (p *plugin) Endpoint() mohttp.Endpoint {
 	prefix := "/plugins/" + p.name
 
-	return http.ALL(
+	return mohttp.ALL(
 		prefix+"/*splat",
-		http.StripPrefix(prefix),
-		http.FromHTTPHandler(p.proxy),
+		mohttp.StripPrefix(prefix),
+		mohttp.FromHTTPHandler(p.proxy),
 	)
 }
 

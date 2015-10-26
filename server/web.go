@@ -1,31 +1,31 @@
 package server
 
 import (
-	nethttp "net/http"
+	"net/http"
 	"path"
 
-	"github.com/jonasi/http"
+	"github.com/jonasi/mohttp"
 )
 
-var webEndpoints = []http.Endpoint{
+var webEndpoints = []mohttp.Endpoint{
 	ServeIndex,
 	ServeWeb,
 	ServeAssets,
 }
 
-var ServeIndex = http.GET("/", http.Redirect("/web"))
+var ServeIndex = mohttp.GET("/", mohttp.Redirect("/web"))
 
-var ServeWeb = http.GET("/web/*splat", http.HandlerFunc(func(c *http.Context) {
-	http.TemplateResponse(c, "index.html", map[string]interface{}{
+var ServeWeb = mohttp.GET("/web/*splat", mohttp.HandlerFunc(func(c *mohttp.Context) {
+	mohttp.TemplateResponse(c, "index.html", map[string]interface{}{
 		"script": "/assets/app.js",
 	})
 }))
 
-var ServeAssets = http.GET("/assets/*asset", http.HandlerFunc(func(c *http.Context) {
+var ServeAssets = mohttp.GET("/assets/*asset", mohttp.HandlerFunc(func(c *mohttp.Context) {
 	var (
 		n = c.Params.ByName("asset")
 		p = path.Join("web", "app", "public", n)
 	)
 
-	nethttp.ServeFile(c.Writer, c.Request, p)
+	http.ServeFile(c.Writer, c.Request, p)
 }))
