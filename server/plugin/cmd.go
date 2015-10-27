@@ -11,6 +11,7 @@ type flags struct {
 	*pflag.FlagSet
 	help     bool
 	location string
+	statedir string
 	version  bool
 	verbose  bool
 }
@@ -28,6 +29,7 @@ func NewCmd(l log15.Logger, server *Server, version string) *Cmd {
 	}
 
 	flags.StringVar(&flags.location, "location", "", "unix socket for http")
+	flags.StringVar(&flags.statedir, "statedir", "", "statedir location")
 	flags.BoolVarP(&flags.help, "help", "h", false, "show help")
 	flags.BoolVarP(&flags.version, "version", "v", false, "show version")
 	flags.BoolVar(&flags.verbose, "verbose", false, "verbose output")

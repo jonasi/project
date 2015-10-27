@@ -16,12 +16,12 @@ import (
 	"gopkg.in/tylerb/graceful.v1"
 )
 
-func New(stateDir string) *Server {
+func New(sd string) *Server {
 	r := mohttp.NewRouter()
 
 	s := &Server{
 		Logger:   log15.New(),
-		stateDir: stateDir,
+		stateDir: stateDir(sd),
 		http: graceful.Server{
 			Server: &http.Server{
 				Handler: r,
@@ -39,7 +39,7 @@ func New(stateDir string) *Server {
 
 	r.AddGlobalHandler(
 		middleware.LogRequest(s.Logger),
-		serverMiddleware(s),
+		srvContextHandler(s),
 		mohttp.Template(t),
 	)
 
@@ -50,7 +50,7 @@ type Server struct {
 	log15.Logger
 	http     graceful.Server
 	stopCh   chan struct{}
-	stateDir string
+	stateDir stateDir
 	plugins  map[string]*plugin
 }
 
@@ -68,12 +68,11 @@ func (s *Server) registerEndpoints(endpoints ...[]mohttp.Endpoint) {
 func (s *Server) Listen(addr string) error {
 	s.Info("Initializing state dir", "dir", s.stateDir)
 
-	if err := os.MkdirAll(s.stateDir, 0755); err != nil {
+	if err := os.MkdirAll(string(s.stateDir), 0755); err != nil {
 		return err
 	}
 
-	lockFile := filepath.Join(s.stateDir, "server.lock")
-	closer, err := lock.Lock(lockFile)
+	closer, err := lock.Lock(s.stateDir.LockFile())
 
 	if err != nil {
 		fmt.Printf("err = %#v\n", err)
@@ -119,8 +118,8 @@ type Config struct {
 	Addr string
 }
 
-func writeConfigFile(config Config, stateDir string) error {
-	f, err := os.Create(filepath.Join(stateDir, "config.json"))
+func writeConfigFile(config Config, sd stateDir) error {
+	f, err := os.Create(sd.ConfigFile())
 
 	if err != nil {
 		return err
@@ -131,10 +130,10 @@ func writeConfigFile(config Config, stateDir string) error {
 	return json.NewEncoder(f).Encode(config)
 }
 
-func ReadConfigFile(stateDir string) (Config, error) {
+func ReadConfigFile(sd string) (Config, error) {
 	var c Config
 
-	f, err := os.Open(filepath.Join(stateDir, "config.json"))
+	f, err := os.Open(stateDir(sd).ConfigFile())
 
 	if err != nil {
 		return Config{}, err
@@ -147,4 +146,26 @@ func ReadConfigFile(stateDir string) (Config, error) {
 	}
 
 	return c, nil
+}
+
+type stateDir string
+
+func (s stateDir) LockFile() string {
+	return filepath.Join(string(s), "server.lock")
+}
+
+func (s stateDir) ConfigFile() string {
+	return filepath.Join(string(s), "config.json")
+}
+
+func (s stateDir) PluginDir(plugin string) string {
+	return filepath.Join(string(s), "plugins", plugin)
+}
+
+func (s stateDir) PluginSockFile(plugin string) string {
+	return filepath.Join(s.PluginDir(plugin), "sock")
+}
+
+func (s stateDir) PluginStateDir(plugin string) string {
+	return filepath.Join(s.PluginDir(plugin), "state")
 }

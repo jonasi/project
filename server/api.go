@@ -3,12 +3,9 @@ package server
 import (
 	"github.com/jonasi/mohttp"
 	"github.com/jonasi/project/server/api"
-	"golang.org/x/net/context"
 )
 
-type ck string
-
-var serverKey = ck("github.com/jonasi/project/server.Server")
+var srvContextHandler, srvStore = mohttp.NewContextValueMiddleware("github.com/jonasi/project/server.Server")
 
 var apiEndpoints = []mohttp.Endpoint{
 	GetVersion,
@@ -16,15 +13,8 @@ var apiEndpoints = []mohttp.Endpoint{
 	GetPlugins,
 }
 
-func serverMiddleware(s *Server) mohttp.Handler {
-	return mohttp.HandlerFunc(func(c *mohttp.Context) {
-		c.Context = context.WithValue(c.Context, serverKey, s)
-		c.Next.Handle(c)
-	})
-}
-
 func getServer(c *mohttp.Context) *Server {
-	return c.Context.Value(serverKey).(*Server)
+	return srvStore.Get(c).(*Server)
 }
 
 var GetVersion = mohttp.GET("/version", api.JSON,

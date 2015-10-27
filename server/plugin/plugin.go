@@ -2,10 +2,10 @@ package plugin
 
 import (
 	"github.com/jonasi/mohttp"
-	"golang.org/x/net/context"
 	"gopkg.in/inconshreveable/log15.v2"
 	"net/http"
 	"path"
+	"path/filepath"
 )
 
 func New(name, version string) *Plugin {
@@ -27,6 +27,7 @@ func New(name, version string) *Plugin {
 type Plugin struct {
 	log15.Logger
 	name      string
+	stateDir  string
 	version   string
 	endpoints []mohttp.Endpoint
 	server    *Server
@@ -39,39 +40,49 @@ func (p *Plugin) RunCmd(args []string) int {
 		return 1
 	}
 
-	p.server.Router().AddGlobalHandler(pluginMiddleware(p))
+	p.stateDir = p.cmd.flags.statedir
+
+	p.AddGlobalHandler(plMiddleware(p))
 	p.server.RegisterEndpoints(getWeb, getIndex, getAsset, getVersion)
 	p.server.RegisterEndpoints(p.endpoints...)
 
 	return p.cmd.Run()
 }
 
+func (p *Plugin) AddGlobalHandler(handlers ...mohttp.Handler) {
+	p.server.Router().AddGlobalHandler(handlers...)
+}
+
 func (p *Plugin) RegisterEndpoints(endpoints ...mohttp.Endpoint) {
 	p.endpoints = append(p.endpoints, endpoints...)
 }
 
-type ck string
+func (p *Plugin) StateDir(paths ...string) string {
+	if len(paths) == 0 {
+		return p.stateDir
+	}
 
-var pluginKey = ck("github.com/jonasi/project/plugin.Plugin")
-
-func pluginMiddleware(p *Plugin) mohttp.Handler {
-	return mohttp.HandlerFunc(func(c *mohttp.Context) {
-		c.Context = context.WithValue(c.Context, pluginKey, p)
-		c.Next.Handle(c)
-	})
+	paths = append([]string{p.stateDir}, paths...)
+	return filepath.Join(paths...)
 }
 
-func getPlugin(c *mohttp.Context) *Plugin {
-	return c.Context.Value(pluginKey).(*Plugin)
+var plMiddleware, store = mohttp.NewContextValueMiddleware("github.com/jonasi/project/plugin.Plugin")
+
+func GetPlugin(c *mohttp.Context) *Plugin {
+	return store.Get(c).(*Plugin)
+}
+
+func GetLogger(c *mohttp.Context) log15.Logger {
+	return GetPlugin(c).Logger
 }
 
 var getVersion = mohttp.GET("/version", mohttp.JSON(nil), mohttp.HandlerFunc(func(c *mohttp.Context) {
-	p := getPlugin(c)
+	p := GetPlugin(c)
 	mohttp.JSONResponse(c, map[string]interface{}{"version": p.version})
 }))
 
 var getAsset = mohttp.GET("/assets/*asset", mohttp.HandlerFunc(func(c *mohttp.Context) {
-	p := getPlugin(c)
+	p := GetPlugin(c)
 	path := path.Join("plugins", "project-"+p.name, "web", "public", c.Params.ByName("asset"))
 	http.ServeFile(c.Writer, c.Request, path)
 }))
@@ -79,7 +90,7 @@ var getAsset = mohttp.GET("/assets/*asset", mohttp.HandlerFunc(func(c *mohttp.Co
 var getIndex = mohttp.GET("/", mohttp.Redirect("web"))
 
 var getWeb = mohttp.GET("/web/*web", mohttp.HandlerFunc(func(c *mohttp.Context) {
-	p := getPlugin(c)
+	p := GetPlugin(c)
 	mohttp.TemplateResponse(c, "index.html", map[string]interface{}{
 		"script": "/plugins/" + p.name + "/assets/app.js",
 	})

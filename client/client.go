@@ -26,7 +26,7 @@ type Client struct {
 	host, port string
 }
 
-func (c *Client) Request(plugin, method, path string, body io.ReadCloser) (*http.Response, error) {
+func (c *Client) Request(plugin, method, path string, body io.Reader) (*http.Response, error) {
 	if path[0] != '/' {
 		path = "/" + path
 	}
@@ -37,7 +37,7 @@ func (c *Client) Request(plugin, method, path string, body io.ReadCloser) (*http
 		path = fmt.Sprintf("http://%s:%s/api%s", c.host, c.port, path)
 	}
 
-	req, err := http.NewRequest(method, path, nil)
+	req, err := http.NewRequest(method, path, body)
 
 	if err != nil {
 		return nil, err

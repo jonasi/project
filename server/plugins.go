@@ -47,14 +47,26 @@ func (p *plugin) req(dest interface{}, method, path string, body io.Reader) erro
 	return json.NewDecoder(resp.Body).Decode(dest)
 }
 
-func (p *plugin) initialize(stateDir string) error {
-	path := filepath.Join(stateDir, p.name+".sock")
+func (p *plugin) initialize(sd stateDir) error {
+	var (
+		pluginDir      = sd.PluginDir(p.name)
+		sockFile       = sd.PluginSockFile(p.name)
+		pluginStateDir = sd.PluginStateDir(p.name)
+	)
 
-	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+	if err := os.MkdirAll(pluginDir, 0755); err != nil {
 		return err
 	}
 
-	cmd := exec.Command(p.path, "--location="+path, "--verbose")
+	if err := os.Remove(sockFile); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+
+	if err := os.MkdirAll(pluginStateDir, 0755); err != nil {
+		return err
+	}
+
+	cmd := exec.Command(p.path, "--location="+sockFile, "--statedir="+pluginStateDir, "--verbose")
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -63,8 +75,8 @@ func (p *plugin) initialize(stateDir string) error {
 		return err
 	}
 
-	p.client = sockHTTPClient(path)
-	p.proxy = sockHTTPReverseProxy(path, "/plugins/"+p.name)
+	p.client = sockHTTPClient(sockFile)
+	p.proxy = sockHTTPReverseProxy(sockFile, "/plugins/"+p.name)
 
 	var (
 		waitCh = make(chan error)

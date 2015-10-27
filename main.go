@@ -5,10 +5,12 @@ import (
 	"github.com/jonasi/project/client"
 	"github.com/jonasi/project/server"
 	"github.com/ogier/pflag"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
+	"strings"
 )
 
 func main() {
@@ -24,6 +26,7 @@ func main() {
 		// client options
 		method = pflag.StringP("method", "X", "GET", "client method")
 		plugin = pflag.String("plugin", "", "client plugin")
+		data   = pflag.StringP("data", "d", "", "client body")
 	)
 
 	pflag.Parse()
@@ -42,7 +45,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	os.Exit(runClient(*stateDir, *plugin, *method, pflag.Arg(0)))
+	os.Exit(runClient(*stateDir, *plugin, *method, pflag.Arg(0), *data))
 }
 
 func runHelp() int {
@@ -50,7 +53,7 @@ func runHelp() int {
 	return 0
 }
 
-func runClient(stateDir, plugin, method, path string) int {
+func runClient(stateDir, plugin, method, path, data string) int {
 	stateDir, err := getStateDir(stateDir)
 
 	if err != nil {
@@ -66,7 +69,16 @@ func runClient(stateDir, plugin, method, path string) int {
 	}
 
 	cl := client.New(conf.Addr)
-	resp, err := cl.Request(plugin, method, path, nil)
+
+	var body io.Reader
+
+	if data == "-" {
+		body = os.Stdin
+	} else if data != "" {
+		body = strings.NewReader(data)
+	}
+
+	resp, err := cl.Request(plugin, method, path, body)
 
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "request error", err)
