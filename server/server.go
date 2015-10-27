@@ -1,11 +1,15 @@
 package server
 
 import (
+	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
+	"github.com/camlistore/lock"
 	"github.com/jonasi/mohttp"
 	"github.com/jonasi/project/server/middleware"
 	"gopkg.in/inconshreveable/log15.v2"
@@ -20,7 +24,6 @@ func New(stateDir string) *Server {
 		stateDir: stateDir,
 		http: graceful.Server{
 			Server: &http.Server{
-				Addr:    ":40000",
 				Handler: r,
 			},
 		},
@@ -62,10 +65,28 @@ func (s *Server) registerEndpoints(endpoints ...[]mohttp.Endpoint) {
 	}
 }
 
-func (s *Server) Listen() error {
+func (s *Server) Listen(addr string) error {
 	s.Info("Initializing state dir", "dir", s.stateDir)
 
 	if err := os.MkdirAll(s.stateDir, 0755); err != nil {
+		return err
+	}
+
+	lockFile := filepath.Join(s.stateDir, "server.lock")
+	closer, err := lock.Lock(lockFile)
+
+	if err != nil {
+		fmt.Printf("err = %#v\n", err)
+		return err
+	}
+
+	defer closer.Close()
+
+	c := Config{
+		Addr: addr,
+	}
+
+	if err := writeConfigFile(c, s.stateDir); err != nil {
 		return err
 	}
 
@@ -85,10 +106,45 @@ func (s *Server) Listen() error {
 
 	s.Info("Starting http server", "addr", s.http.Addr)
 
+	s.http.Addr = addr
 	return s.http.ListenAndServe()
 }
 
 func (s *Server) Close() {
 	s.Info("Stopping http server")
 	s.http.Stop(time.Second)
+}
+
+type Config struct {
+	Addr string
+}
+
+func writeConfigFile(config Config, stateDir string) error {
+	f, err := os.Create(filepath.Join(stateDir, "config.json"))
+
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+
+	return json.NewEncoder(f).Encode(config)
+}
+
+func ReadConfigFile(stateDir string) (Config, error) {
+	var c Config
+
+	f, err := os.Open(filepath.Join(stateDir, "config.json"))
+
+	if err != nil {
+		return Config{}, err
+	}
+
+	defer f.Close()
+
+	if err := json.NewDecoder(f).Decode(&c); err != nil {
+		return Config{}, err
+	}
+
+	return c, nil
 }
