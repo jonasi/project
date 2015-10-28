@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
-	"os/exec"
 
 	"github.com/jonasi/mohttp"
 	"github.com/jonasi/project/server/api"
@@ -15,26 +14,40 @@ const version = "0.0.1"
 
 var handler, store = mohttp.NewContextValueMiddleware("github.com/jonasi/project/plugins/project-shell")
 
-func getValue(c *mohttp.Context) interface{} {
-	return store.Get(c)
+func getValue(c *mohttp.Context) *Commander {
+	return store.Get(c).(*Commander)
 }
 
 func main() {
 	pl := plugin.New("shell", version)
 
 	pl.AddGlobalHandler(
-		handler(nil),
+		handler(NewCommander()),
 	)
 
 	pl.RegisterEndpoints(
+		GetCommand,
 		RunCommand,
 	)
 
 	os.Exit(pl.RunCmd(os.Args))
 }
 
+var GetCommand = mohttp.GET("/api/commands/:id", api.JSON, mohttp.HandlerFunc(func(c *mohttp.Context) {
+	var (
+		id        = c.ParamInt("id")
+		commander = getValue(c)
+		run       = commander.GetRun(id)
+	)
+
+	api.JSONResponse(c, run, nil)
+}))
+
 var RunCommand = mohttp.POST("/api/commands", api.JSON, mohttp.HandlerFunc(func(c *mohttp.Context) {
-	logger := plugin.GetLogger(c)
+	var (
+		logger    = plugin.GetLogger(c)
+		commander = getValue(c)
+	)
 
 	var args struct {
 		Args []string `json:"args"`
@@ -52,18 +65,6 @@ var RunCommand = mohttp.POST("/api/commands", api.JSON, mohttp.HandlerFunc(func(
 		return
 	}
 
-	var (
-		cmd  = args.Args[0]
-		rest = []string{}
-	)
-
-	if len(args.Args) > 1 {
-		rest = args.Args[1:]
-	}
-
-	command := exec.Command(cmd, rest...)
-	command.Stderr = os.Stderr
-	command.Stdout = os.Stdout
-
-	command.Run()
+	r, err := commander.Run(args.Args...)
+	api.JSONResponse(c, r, err)
 }))
