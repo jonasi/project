@@ -9,12 +9,12 @@ import API from 'web/common/api';
 
 import ContextProvider from 'web/common/components/context_provider';
 
-export function render({ routes }) {
+export function render({ routes, context = {} }) {
     const root = document.getElementById('react-root');
     const api = new API();
     const comm = new Comm();
 
-    const Root = ContextProvider({ api, comm });
+    const Root = ContextProvider({ api, comm, ...context });
 
     reactRender(
         <Root>

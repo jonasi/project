@@ -1,7 +1,8 @@
 import 'whatwg-fetch';
 
 import React, { Component, PropTypes } from 'react';
-import { Record, Map } from 'immutable';
+import { Map } from 'immutable';
+import ValueState from './value_state';
 
 const { object } = PropTypes;
 
@@ -45,12 +46,6 @@ export function hoc(vals) {
     return c => comp(c, vals);
 }
 
-const ValueState = Record({
-    state: void 0,
-    value: void 0,
-    error: void 0,
-});
-
 function comp(Comp, vals) {
     let results = Map();
 
@@ -64,8 +59,7 @@ function comp(Comp, vals) {
             vals[k].path = () => old;
         }
 
-        results = results.set(k, ValueState({
-            state: 'empty',
+        results = results.set(k, new ValueState({
             value: vals[k].initialValue,
         }));
     }
@@ -83,21 +77,29 @@ function comp(Comp, vals) {
 
         componentWillMount() {
             const { api } = this.context;
+            const { results } = this.state;
 
             for (const k in vals) {
                 const path = vals[k].path(this.props);
+                results.set(k, results.get(k).setLoading());
 
                 api.get(path)
                     .then(val => this._mergeResults(k, val))
                     .catch(error => this._mergeResults(k, void 0, error));
             }
+
+            this.setState({ results });
         }
 
         _mergeResults(k, value, error) {
             const { results } = this.state;
-            const state = arguments.length === 2 ? 'success' : 'error';
+            let v;
 
-            const v = ValueState({ state, value, error });
+            if (arguments.length === 2) {
+                v = results.get(k).setValue(value);
+            } else {
+                v = results.get(k).setError(error);
+            }
 
             this.setState({ 
                 results: results.set(k, v),
