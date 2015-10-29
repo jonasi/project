@@ -43,8 +43,8 @@ func (p *Plugin) RunCmd(args []string) int {
 	p.stateDir = p.cmd.flags.statedir
 
 	p.Use(plMiddleware(p))
-	p.server.RegisterRoutes(getWeb, getIndex, getAsset, getVersion)
-	p.server.RegisterRoutes(p.routes...)
+	p.server.Register(getWeb, getIndex, getAsset, getVersion)
+	p.server.Register(p.routes...)
 
 	return p.cmd.Run()
 }

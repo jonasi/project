@@ -2,24 +2,21 @@ package plugin
 
 import (
 	"github.com/jonasi/mohttp"
+	"github.com/jonasi/project/server/http"
 	"github.com/jonasi/project/server/middleware"
 	"gopkg.in/inconshreveable/log15.v2"
 	"html/template"
 	"net"
-	"net/http"
 )
 
 func NewServer(l log15.Logger) *Server {
 	s := &Server{
-		Logger: l,
-		http: &http.Server{
-			Handler: mohttp.NewRouter(),
-		},
+		Server: http.NewServer(l),
 	}
 
 	t := template.Must(template.ParseGlob("server/templates/*"))
 
-	s.Router().Use(
+	s.Use(
 		middleware.LogRequest(l),
 		mohttp.Template(t),
 	)
@@ -28,30 +25,15 @@ func NewServer(l log15.Logger) *Server {
 }
 
 type Server struct {
-	log15.Logger
-	http *http.Server
+	*http.Server
 }
 
 func (s *Server) Listen(addr string) error {
-	s.Info("Initializing http server", "location", addr)
 	l, err := net.Listen("unix", addr)
 
 	if err != nil {
 		return err
 	}
 
-	return s.http.Serve(l)
-}
-
-func (s *Server) Router() *mohttp.Router {
-	return s.http.Handler.(*mohttp.Router)
-}
-
-func (s *Server) RegisterRoutes(routes ...mohttp.Route) {
-	r := s.http.Handler.(*mohttp.Router)
-
-	for _, rt := range routes {
-		r.Register(rt)
-		s.Info("Registered route", "method", rt.Methods(), "path", rt.Paths())
-	}
+	return s.Serve(l)
 }

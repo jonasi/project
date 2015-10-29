@@ -2,32 +2,21 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"html/template"
-	"net/http"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/camlistore/lock"
 	"github.com/jonasi/mohttp"
+	"github.com/jonasi/project/server/http"
 	"github.com/jonasi/project/server/middleware"
 	"gopkg.in/inconshreveable/log15.v2"
-	"gopkg.in/tylerb/graceful.v1"
 )
 
 func New(sd string) *Server {
-	r := mohttp.NewRouter()
-
 	s := &Server{
-		Logger:   log15.New(),
+		Server:   http.NewServer(log15.New()),
 		stateDir: stateDir(sd),
-		http: graceful.Server{
-			Server: &http.Server{
-				Handler: r,
-			},
-		},
-		stopCh: make(chan struct{}),
 	}
 
 	s.registerRoutes(
@@ -37,7 +26,7 @@ func New(sd string) *Server {
 
 	t := template.Must(template.ParseGlob("server/templates/*"))
 
-	r.Use(
+	s.Use(
 		middleware.LogRequest(s.Logger),
 		srvContextHandler(s),
 		mohttp.Template(t),
@@ -47,21 +36,14 @@ func New(sd string) *Server {
 }
 
 type Server struct {
-	log15.Logger
-	http     graceful.Server
-	stopCh   chan struct{}
+	*http.Server
 	stateDir stateDir
 	plugins  map[string]*plugin
 }
 
 func (s *Server) registerRoutes(routes ...[]mohttp.Route) {
-	r := s.http.Server.Handler.(*mohttp.Router)
-
 	for _, rts := range routes {
-		for _, rt := range rts {
-			s.Info("Registered route", "method", rt.Methods(), "path", rt.Paths())
-			r.Register(rt)
-		}
+		s.Register(rts...)
 	}
 }
 
@@ -75,7 +57,6 @@ func (s *Server) Listen(addr string) error {
 	closer, err := lock.Lock(s.stateDir.LockFile())
 
 	if err != nil {
-		fmt.Printf("err = %#v\n", err)
 		return err
 	}
 
@@ -103,15 +84,7 @@ func (s *Server) Listen(addr string) error {
 		s.registerRoutes([]mohttp.Route{p.Route()})
 	}
 
-	s.Info("Starting http server", "addr", s.http.Addr)
-
-	s.http.Addr = addr
-	return s.http.ListenAndServe()
-}
-
-func (s *Server) Close() {
-	s.Info("Stopping http server")
-	s.http.Stop(time.Second)
+	return s.Server.Listen(addr)
 }
 
 type Config struct {
