@@ -7,7 +7,7 @@ import (
 	"github.com/jonasi/mohttp"
 )
 
-var webEndpoints = []mohttp.Endpoint{
+var webRoutes = []mohttp.Route{
 	ServeIndex,
 	ServeWeb,
 	ServeAssets,

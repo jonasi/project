@@ -7,7 +7,7 @@ import (
 
 var srvContextHandler, srvStore = mohttp.NewContextValueMiddleware("github.com/jonasi/project/server.Server")
 
-var apiEndpoints = []mohttp.Endpoint{
+var apiRoutes = []mohttp.Route{
 	GetVersion,
 	Shutdown,
 	GetPlugins,

@@ -19,7 +19,7 @@ func NewServer(l log15.Logger) *Server {
 
 	t := template.Must(template.ParseGlob("server/templates/*"))
 
-	s.Router().AddGlobalHandler(
+	s.Router().Use(
 		middleware.LogRequest(l),
 		mohttp.Template(t),
 	)
@@ -47,11 +47,11 @@ func (s *Server) Router() *mohttp.Router {
 	return s.http.Handler.(*mohttp.Router)
 }
 
-func (s *Server) RegisterEndpoints(endpoints ...mohttp.Endpoint) {
+func (s *Server) RegisterRoutes(routes ...mohttp.Route) {
 	r := s.http.Handler.(*mohttp.Router)
 
-	for _, ep := range endpoints {
-		r.Register(ep)
-		s.Info("Registered route", "method", ep.Methods(), "path", ep.Paths())
+	for _, rt := range routes {
+		r.Register(rt)
+		s.Info("Registered route", "method", rt.Methods(), "path", rt.Paths())
 	}
 }

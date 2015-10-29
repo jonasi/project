@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-type pluginEndpoint struct {
+type pluginRoute struct {
 	Method string `json:"method"`
 	Path   string `json:"path"`
 }
@@ -121,7 +121,7 @@ func (p *plugin) initialize(sd stateDir) error {
 	return nil
 }
 
-func (p *plugin) Endpoint() mohttp.Endpoint {
+func (p *plugin) Route() mohttp.Route {
 	prefix := "/plugins/" + p.name
 
 	return mohttp.ALL(

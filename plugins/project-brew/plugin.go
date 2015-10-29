@@ -10,7 +10,7 @@ const version = "0.0.1"
 func main() {
 	pl := plugin.New("brew", version)
 
-	pl.RegisterEndpoints(
+	pl.RegisterRoutes(
 		GetVersion,
 		ListFormulae,
 		GetFormula,

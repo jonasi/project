@@ -21,11 +21,11 @@ func getValue(c *mohttp.Context) *Commander {
 func main() {
 	pl := plugin.New("shell", version)
 
-	pl.AddGlobalHandler(
+	pl.Use(
 		handler(NewCommander()),
 	)
 
-	pl.RegisterEndpoints(
+	pl.RegisterRoutes(
 		GetCommand,
 		RunCommand,
 	)

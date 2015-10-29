@@ -15,23 +15,23 @@ func New(name, version string) *Plugin {
 	s := NewServer(l)
 
 	return &Plugin{
-		Logger:    l,
-		name:      name,
-		version:   version,
-		endpoints: []mohttp.Endpoint{},
-		server:    s,
-		cmd:       NewCmd(l, s, version),
+		Logger:  l,
+		name:    name,
+		version: version,
+		routes:  []mohttp.Route{},
+		server:  s,
+		cmd:     NewCmd(l, s, version),
 	}
 }
 
 type Plugin struct {
 	log15.Logger
-	name      string
-	stateDir  string
-	version   string
-	endpoints []mohttp.Endpoint
-	server    *Server
-	cmd       *Cmd
+	name     string
+	stateDir string
+	version  string
+	routes   []mohttp.Route
+	server   *Server
+	cmd      *Cmd
 }
 
 func (p *Plugin) RunCmd(args []string) int {
@@ -42,19 +42,19 @@ func (p *Plugin) RunCmd(args []string) int {
 
 	p.stateDir = p.cmd.flags.statedir
 
-	p.AddGlobalHandler(plMiddleware(p))
-	p.server.RegisterEndpoints(getWeb, getIndex, getAsset, getVersion)
-	p.server.RegisterEndpoints(p.endpoints...)
+	p.Use(plMiddleware(p))
+	p.server.RegisterRoutes(getWeb, getIndex, getAsset, getVersion)
+	p.server.RegisterRoutes(p.routes...)
 
 	return p.cmd.Run()
 }
 
-func (p *Plugin) AddGlobalHandler(handlers ...mohttp.Handler) {
-	p.server.Router().AddGlobalHandler(handlers...)
+func (p *Plugin) Use(handlers ...mohttp.Handler) {
+	p.server.Router().Use(handlers...)
 }
 
-func (p *Plugin) RegisterEndpoints(endpoints ...mohttp.Endpoint) {
-	p.endpoints = append(p.endpoints, endpoints...)
+func (p *Plugin) RegisterRoutes(routes ...mohttp.Route) {
+	p.routes = append(p.routes, routes...)
 }
 
 func (p *Plugin) StateDir(paths ...string) string {

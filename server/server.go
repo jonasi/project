@@ -30,14 +30,14 @@ func New(sd string) *Server {
 		stopCh: make(chan struct{}),
 	}
 
-	s.registerEndpoints(
-		webEndpoints,
-		mohttp.Prefix("/api", apiEndpoints...),
+	s.registerRoutes(
+		webRoutes,
+		mohttp.Prefix("/api", apiRoutes...),
 	)
 
 	t := template.Must(template.ParseGlob("server/templates/*"))
 
-	r.AddGlobalHandler(
+	r.Use(
 		middleware.LogRequest(s.Logger),
 		srvContextHandler(s),
 		mohttp.Template(t),
@@ -54,13 +54,13 @@ type Server struct {
 	plugins  map[string]*plugin
 }
 
-func (s *Server) registerEndpoints(endpoints ...[]mohttp.Endpoint) {
+func (s *Server) registerRoutes(routes ...[]mohttp.Route) {
 	r := s.http.Server.Handler.(*mohttp.Router)
 
-	for _, eps := range endpoints {
-		for _, ep := range eps {
-			s.Info("Registered route", "method", ep.Methods(), "path", ep.Paths())
-			r.Register(ep)
+	for _, rts := range routes {
+		for _, rt := range rts {
+			s.Info("Registered route", "method", rt.Methods(), "path", rt.Paths())
+			r.Register(rt)
 		}
 	}
 }
@@ -100,7 +100,7 @@ func (s *Server) Listen(addr string) error {
 			return err
 		}
 
-		s.registerEndpoints([]mohttp.Endpoint{p.Endpoint()})
+		s.registerRoutes([]mohttp.Route{p.Route()})
 	}
 
 	s.Info("Starting http server", "addr", s.http.Addr)
