@@ -9,7 +9,7 @@ const { object } = PropTypes;
 const { fetch } = window;
 
 export default class API {
-    get(...args) {
+    call(...args) {
         return fetch(...args).then(d => d.json()).then(d => {
             if (d.error) {
                 throw new Error(d.error);
@@ -83,7 +83,9 @@ function comp(Comp, vals) {
                 const path = vals[k].path(this.props);
                 results.set(k, results.get(k).setLoading());
 
-                api.get(path)
+                api.call(path, {
+                    method: 'get',
+                })
                     .then(val => this._mergeResults(k, val))
                     .catch(error => this._mergeResults(k, void 0, error));
             }

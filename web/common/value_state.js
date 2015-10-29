@@ -6,6 +6,12 @@ const base = Record({
     error: void 0,
 });
 
+function mutate(vs, state, value, error) {
+    return vs.withMutations(val => {
+        val.set('state', state).set('value', value).set('error', error);
+    });
+}
+
 export default class extends base {
     constructor({ state, value, error }) {
         if (state === void 0) {
@@ -22,9 +28,7 @@ export default class extends base {
     }
 
     reset() {
-        return this.withMutations(val => {
-            val.set('state', 'empty').set('value', void 0).set('error', void 0);
-        });
+        return mutate(this, 'empty', void 0, void 0);
     }
 
     setLoading() {
@@ -32,14 +36,10 @@ export default class extends base {
     }
 
     setValue(value) {
-        return this.withMutations(val => {
-            val.set('state', 'success').set('value', value).set('error', void 0);
-        });
+        return mutate(this, 'success', value, void 0);
     }
 
     setError(error) {
-        return this.withMutations(val => {
-            val.set('state', 'error').set('value', void 0).set('error', error);
-        });
+        return mutate(this, 'error', void 0, error);
     }
 }
