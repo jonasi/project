@@ -16,16 +16,24 @@ export default class extends Component {
     constructor(props, context) {
         super(props, context);
 
+        this._plugin = props.params.plugin;
         this._src = this.buildSrc(props);
     }
 
     componentWillReceiveProps(props) {
         const { comm } = this.context;
+        const { plugin } = props.params;
         const src = this.buildSrc(props);
+
+        if (plugin != this._plugin) {
+            this._src = src;
+            this._plugin = plugin;
+            this.forceUpdate();
+            return;
+        }
 
         if (this._src !== src) {
             this._src = src;
-
             comm.dispatchHistoryMsg(this.refs.child, '_replaceState', [null, src]);
         }
     }
