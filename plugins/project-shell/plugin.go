@@ -35,7 +35,7 @@ func main() {
 
 var GetCommand = mohttp.GET("/api/commands/:id", api.JSON, mohttp.HandlerFunc(func(c *mohttp.Context) {
 	var (
-		id        = c.ParamInt("id")
+		id        = c.PathValues().Params.Int("id")
 		commander = getValue(c)
 		run       = commander.GetRun(id)
 	)
@@ -53,15 +53,15 @@ var RunCommand = mohttp.POST("/api/commands", api.JSON, mohttp.HandlerFunc(func(
 		Args []string `json:"args"`
 	}
 
-	if err := json.NewDecoder(c.Request.Body).Decode(&args); err != nil {
+	if err := json.NewDecoder(c.Request().Body).Decode(&args); err != nil {
 		logger.Error("JSON decoding error", "error", err)
 
-		http.Error(c.Writer, "Bad Request", http.StatusBadRequest)
+		http.Error(c.ResponseWriter(), "Bad Request", http.StatusBadRequest)
 		return
 	}
 
 	if len(args.Args) < 1 {
-		http.Error(c.Writer, "Bad Request", http.StatusBadRequest)
+		http.Error(c.ResponseWriter(), "Bad Request", http.StatusBadRequest)
 		return
 	}
 

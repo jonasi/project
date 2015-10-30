@@ -23,9 +23,9 @@ var ServeWeb = mohttp.GET("/web/*splat", mohttp.HandlerFunc(func(c *mohttp.Conte
 
 var ServeAssets = mohttp.GET("/assets/*asset", mohttp.HandlerFunc(func(c *mohttp.Context) {
 	var (
-		n = c.Params.ByName("asset")
+		n = c.PathValues().Params.String("asset")
 		p = path.Join("web", "app", "public", n)
 	)
 
-	http.ServeFile(c.Writer, c.Request, p)
+	http.ServeFile(c.ResponseWriter(), c.Request(), p)
 }))

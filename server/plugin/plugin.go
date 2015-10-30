@@ -83,8 +83,8 @@ var getVersion = mohttp.GET("/version", mohttp.JSON(nil), mohttp.HandlerFunc(fun
 
 var getAsset = mohttp.GET("/assets/*asset", mohttp.HandlerFunc(func(c *mohttp.Context) {
 	p := GetPlugin(c)
-	path := path.Join("plugins", "project-"+p.name, "web", "public", c.Params.ByName("asset"))
-	http.ServeFile(c.Writer, c.Request, path)
+	path := path.Join("plugins", "project-"+p.name, "web", "public", c.PathValues().Params.String("asset"))
+	http.ServeFile(c.ResponseWriter(), c.Request(), path)
 }))
 
 var getIndex = mohttp.GET("/", mohttp.Redirect("web"))
