@@ -1,10 +1,9 @@
 package server
 
 import (
-	"net/http"
-	"path"
-
 	"github.com/jonasi/mohttp"
+	"golang.org/x/net/context"
+	"path"
 )
 
 var webRoutes = []mohttp.Route{
@@ -15,17 +14,13 @@ var webRoutes = []mohttp.Route{
 
 var ServeIndex = mohttp.GET("/", mohttp.Redirect("/web"))
 
-var ServeWeb = mohttp.GET("/web/*splat", mohttp.HandlerFunc(func(c *mohttp.Context) {
-	mohttp.TemplateResponse(c, "index.html", map[string]interface{}{
+var ServeWeb = mohttp.GET("/web/*splat", mohttp.TemplateHandler(func(c context.Context) (string, map[string]interface{}) {
+	return "index.html", map[string]interface{}{
 		"script": "/assets/app.js",
-	})
+	}
 }))
 
-var ServeAssets = mohttp.GET("/assets/*asset", mohttp.HandlerFunc(func(c *mohttp.Context) {
-	var (
-		n = c.PathValues().Params.String("asset")
-		p = path.Join("web", "app", "public", n)
-	)
-
-	http.ServeFile(c.ResponseWriter(), c.Request(), p)
+var ServeAssets = mohttp.GET("/assets/*asset", mohttp.FileHandler(func(c context.Context) string {
+	n := mohttp.GetPathValues(c).Params.String("asset")
+	return path.Join("web", "app", "public", n)
 }))

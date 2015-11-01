@@ -23,6 +23,16 @@ type Commander struct {
 	mu        sync.RWMutex
 }
 
+func (c *Commander) History() []*Run {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	sl := make([]*Run, len(c.sl))
+	copy(sl, c.sl)
+
+	return sl
+}
+
 func (c *Commander) GetRun(id int) *Run {
 	c.mu.RLock()
 	defer c.mu.RUnlock()

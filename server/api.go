@@ -3,9 +3,10 @@ package server
 import (
 	"github.com/jonasi/mohttp"
 	"github.com/jonasi/project/server/api"
+	"golang.org/x/net/context"
 )
 
-var srvContextHandler, srvStore = mohttp.NewContextValueMiddleware("github.com/jonasi/project/server.Server")
+var srvContextHandler, srvStore = mohttp.NewContextValuePair("github.com/jonasi/project/server.Server")
 
 var apiRoutes = []mohttp.Route{
 	GetVersion,
@@ -13,20 +14,20 @@ var apiRoutes = []mohttp.Route{
 	GetPlugins,
 }
 
-func getServer(c *mohttp.Context) *Server {
+func getServer(c context.Context) *Server {
 	return srvStore.Get(c).(*Server)
 }
 
 var GetVersion = mohttp.GET("/version", api.JSON,
-	mohttp.HandlerFunc(func(c *mohttp.Context) {
-		api.JSONResponse(c, Version, nil)
+	mohttp.JSONHandler(func(c context.Context) (interface{}, error) {
+		return Version, nil
 	}),
 )
 
 var Shutdown = mohttp.DELETE("/server", api.JSON,
-	mohttp.HandlerFunc(func(c *mohttp.Context) {
+	mohttp.JSONHandler(func(c context.Context) (interface{}, error) {
 		getServer(c).Close()
-		api.JSONResponse(c, true, nil)
+		return true, nil
 	}),
 )
 
@@ -35,7 +36,7 @@ type pl struct {
 }
 
 var GetPlugins = mohttp.GET("/plugins", api.JSON,
-	mohttp.HandlerFunc(func(c *mohttp.Context) {
+	mohttp.JSONHandler(func(c context.Context) (interface{}, error) {
 		var (
 			plugins = getServer(c).plugins
 			resp    = make([]pl, len(plugins))
@@ -47,6 +48,6 @@ var GetPlugins = mohttp.GET("/plugins", api.JSON,
 			i++
 		}
 
-		api.JSONResponse(c, resp, nil)
+		return resp, nil
 	}),
 )

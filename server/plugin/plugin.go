@@ -2,8 +2,8 @@ package plugin
 
 import (
 	"github.com/jonasi/mohttp"
+	"golang.org/x/net/context"
 	"gopkg.in/inconshreveable/log15.v2"
-	"net/http"
 	"path"
 	"path/filepath"
 )
@@ -66,32 +66,32 @@ func (p *Plugin) StateDir(paths ...string) string {
 	return filepath.Join(paths...)
 }
 
-var plMiddleware, store = mohttp.NewContextValueMiddleware("github.com/jonasi/project/plugin.Plugin")
+var plMiddleware, store = mohttp.NewContextValuePair("github.com/jonasi/project/plugin.Plugin")
 
-func GetPlugin(c *mohttp.Context) *Plugin {
+func GetPlugin(c context.Context) *Plugin {
 	return store.Get(c).(*Plugin)
 }
 
-func GetLogger(c *mohttp.Context) log15.Logger {
+func GetLogger(c context.Context) log15.Logger {
 	return GetPlugin(c).Logger
 }
 
-var getVersion = mohttp.GET("/version", mohttp.JSON(nil), mohttp.HandlerFunc(func(c *mohttp.Context) {
+var getVersion = mohttp.GET("/version", mohttp.JSONHandler(func(c context.Context) (interface{}, error) {
 	p := GetPlugin(c)
-	mohttp.JSONResponse(c, map[string]interface{}{"version": p.version})
+
+	return map[string]interface{}{"version": p.version}, nil
 }))
 
-var getAsset = mohttp.GET("/assets/*asset", mohttp.HandlerFunc(func(c *mohttp.Context) {
+var getAsset = mohttp.GET("/assets/*asset", mohttp.FileHandler(func(c context.Context) string {
 	p := GetPlugin(c)
-	path := path.Join("plugins", "project-"+p.name, "web", "public", c.PathValues().Params.String("asset"))
-	http.ServeFile(c.ResponseWriter(), c.Request(), path)
+	return path.Join("plugins", "project-"+p.name, "web", "public", mohttp.GetPathValues(c).Params.String("asset"))
 }))
 
 var getIndex = mohttp.GET("/", mohttp.Redirect("web"))
 
-var getWeb = mohttp.GET("/web/*web", mohttp.HandlerFunc(func(c *mohttp.Context) {
+var getWeb = mohttp.GET("/web/*web", mohttp.TemplateHandler(func(c context.Context) (string, map[string]interface{}) {
 	p := GetPlugin(c)
-	mohttp.TemplateResponse(c, "index.html", map[string]interface{}{
+	return "index.html", map[string]interface{}{
 		"script": "/plugins/" + p.name + "/assets/app.js",
-	})
+	}
 }))

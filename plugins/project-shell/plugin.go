@@ -2,7 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"net/http"
+	"fmt"
+	"golang.org/x/net/context"
 	"os"
 
 	"github.com/jonasi/mohttp"
@@ -12,9 +13,9 @@ import (
 
 const version = "0.0.1"
 
-var handler, store = mohttp.NewContextValueMiddleware("github.com/jonasi/project/plugins/project-shell")
+var handler, store = mohttp.NewContextValuePair("github.com/jonasi/project/plugins/project-shell")
 
-func getValue(c *mohttp.Context) *Commander {
+func getValue(c context.Context) *Commander {
 	return store.Get(c).(*Commander)
 }
 
@@ -26,6 +27,7 @@ func main() {
 	)
 
 	pl.RegisterRoutes(
+		GetCommands,
 		GetCommand,
 		RunCommand,
 	)
@@ -33,17 +35,21 @@ func main() {
 	os.Exit(pl.RunCmd(os.Args))
 }
 
-var GetCommand = mohttp.GET("/api/commands/:id", api.JSON, mohttp.HandlerFunc(func(c *mohttp.Context) {
-	var (
-		id        = c.PathValues().Params.Int("id")
-		commander = getValue(c)
-		run       = commander.GetRun(id)
-	)
-
-	api.JSONResponse(c, run, nil)
+var GetCommands = mohttp.GET("/api/commands", api.JSON, mohttp.JSONHandler(func(c context.Context) (interface{}, error) {
+	commander := getValue(c)
+	return commander.History(), nil
 }))
 
-var RunCommand = mohttp.POST("/api/commands", api.JSON, mohttp.HandlerFunc(func(c *mohttp.Context) {
+var GetCommand = mohttp.GET("/api/commands/:id", api.JSON, mohttp.JSONHandler(func(c context.Context) (interface{}, error) {
+	var (
+		id        = mohttp.GetPathValues(c).Params.Int("id")
+		commander = getValue(c)
+	)
+
+	return commander.GetRun(id), nil
+}))
+
+var RunCommand = mohttp.POST("/api/commands", api.JSON, mohttp.JSONHandler(func(c context.Context) (interface{}, error) {
 	var (
 		logger    = plugin.GetLogger(c)
 		commander = getValue(c)
@@ -53,18 +59,14 @@ var RunCommand = mohttp.POST("/api/commands", api.JSON, mohttp.HandlerFunc(func(
 		Args []string `json:"args"`
 	}
 
-	if err := json.NewDecoder(c.Request().Body).Decode(&args); err != nil {
+	if err := json.NewDecoder(mohttp.GetRequest(c).Body).Decode(&args); err != nil {
 		logger.Error("JSON decoding error", "error", err)
-
-		http.Error(c.ResponseWriter(), "Bad Request", http.StatusBadRequest)
-		return
+		return nil, err
 	}
 
 	if len(args.Args) < 1 {
-		http.Error(c.ResponseWriter(), "Bad Request", http.StatusBadRequest)
-		return
+		return nil, fmt.Errorf("Invalid args")
 	}
 
-	r, err := commander.Run(args.Args...)
-	api.JSONResponse(c, r, err)
+	return commander.Run(args.Args...)
 }))
