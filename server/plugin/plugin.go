@@ -87,7 +87,7 @@ var getAsset = mohttp.GET("/assets/*asset", mohttp.FileHandler(func(c context.Co
 	return path.Join("plugins", "project-"+p.name, "web", "public", mohttp.GetPathValues(c).Params.String("asset"))
 }))
 
-var getIndex = mohttp.GET("/", mohttp.Redirect("web"))
+var getIndex = mohttp.GET("/", mohttp.TemporaryRedirectHandler("web"))
 
 var getWeb = mohttp.GET("/web/*web", mohttp.TemplateHandler(func(c context.Context) (string, map[string]interface{}) {
 	p := GetPlugin(c)

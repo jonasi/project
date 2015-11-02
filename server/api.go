@@ -2,41 +2,61 @@ package server
 
 import (
 	"github.com/jonasi/mohttp"
+	"github.com/jonasi/mohttp/hateoas"
 	"github.com/jonasi/project/server/api"
 	"golang.org/x/net/context"
 )
 
 var srvContextHandler, srvStore = mohttp.NewContextValuePair("github.com/jonasi/project/server.Server")
 
-var apiRoutes = []mohttp.Route{
-	GetVersion,
-	Shutdown,
-	GetPlugins,
-}
-
 func getServer(c context.Context) *Server {
 	return srvStore.Get(c).(*Server)
 }
 
-var GetVersion = mohttp.GET("/version", api.JSON,
-	mohttp.JSONHandler(func(c context.Context) (interface{}, error) {
-		return Version, nil
-	}),
-)
-
-var Shutdown = mohttp.DELETE("/server", api.JSON,
-	mohttp.JSONHandler(func(c context.Context) (interface{}, error) {
-		getServer(c).Close()
-		return true, nil
-	}),
-)
-
-type pl struct {
-	Name string `json:"name"`
+var apiService = hateoas.Service{
+	Resources: []*hateoas.Resource{
+		root, version, status, plugins,
+	},
+	Use: []mohttp.Handler{
+		api.JSON,
+	},
 }
 
-var GetPlugins = mohttp.GET("/plugins", api.JSON,
-	mohttp.JSONHandler(func(c context.Context) (interface{}, error) {
+var root = hateoas.NewResource(
+	hateoas.Path("/"),
+	hateoas.Link("version", version),
+	hateoas.Link("status", status),
+	hateoas.Link("plugins", plugins),
+)
+
+var version = hateoas.NewResource(
+	hateoas.Path("/version"),
+	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
+		return Version, nil
+	})),
+)
+
+var status = hateoas.NewResource(
+	hateoas.Path("/status"),
+	hateoas.PATCH(mohttp.HandlerFunc(func(c context.Context) {
+		var body struct {
+			Status string `json:"status"`
+		}
+
+		if err := mohttp.JSONBodyDecode(c, &body); err != nil {
+			mohttp.Error(c, "Internal Server Error", 500)
+			return
+		}
+
+		if body.Status == "inactive" {
+			getServer(c).Close()
+		}
+	})),
+)
+
+var plugins = hateoas.NewResource(
+	hateoas.Path("/plugins"),
+	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
 		var (
 			plugins = getServer(c).plugins
 			resp    = make([]pl, len(plugins))
@@ -49,5 +69,9 @@ var GetPlugins = mohttp.GET("/plugins", api.JSON,
 		}
 
 		return resp, nil
-	}),
+	})),
 )
+
+type pl struct {
+	Name string `json:"name"`
+}

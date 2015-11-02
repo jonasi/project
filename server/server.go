@@ -19,9 +19,11 @@ func New(sd string) *Server {
 		stateDir: stateDir(sd),
 	}
 
+	apiService.Use = append(apiService.Use, mohttp.StripPrefixHandler("/api"))
+
 	s.registerRoutes(
 		webRoutes,
-		mohttp.Prefix("/api", apiRoutes...),
+		mohttp.Prefix("/api", apiService.Routes()...),
 	)
 
 	t := template.Must(template.ParseGlob("server/templates/*"))
@@ -81,7 +83,7 @@ func (s *Server) Listen(addr string) error {
 			return err
 		}
 
-		s.registerRoutes([]mohttp.Route{p.Route()})
+		s.registerRoutes(p.Routes())
 	}
 
 	return s.Server.Listen(addr)

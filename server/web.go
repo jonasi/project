@@ -12,7 +12,7 @@ var webRoutes = []mohttp.Route{
 	ServeAssets,
 }
 
-var ServeIndex = mohttp.GET("/", mohttp.Redirect("/web"))
+var ServeIndex = mohttp.GET("/", mohttp.TemporaryRedirectHandler("/web"))
 
 var ServeWeb = mohttp.GET("/web/*splat", mohttp.TemplateHandler(func(c context.Context) (string, map[string]interface{}) {
 	return "index.html", map[string]interface{}{

@@ -42,7 +42,7 @@ func (s *Server) Use(handlers ...mohttp.Handler) {
 
 func (s *Server) Register(routes ...mohttp.Route) {
 	for _, rt := range routes {
-		s.Info("Registered route", "method", rt.Methods(), "path", rt.Paths())
+		s.Info("Registered route", "methods", rt.Method(), "path", rt.Path())
 		s.Router().Register(rt)
 	}
 }

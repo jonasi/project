@@ -121,12 +121,12 @@ func (p *plugin) initialize(sd stateDir) error {
 	return nil
 }
 
-func (p *plugin) Route() mohttp.Route {
+func (p *plugin) Routes() []mohttp.Route {
 	prefix := "/plugins/" + p.name
 
 	return mohttp.ALL(
 		prefix+"/*splat",
-		mohttp.StripPrefix(prefix),
+		mohttp.StripPrefixHandler(prefix),
 		mohttp.FromHTTPHandler(p.proxy),
 	)
 }
