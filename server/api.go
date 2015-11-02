@@ -13,14 +13,10 @@ func getServer(c context.Context) *Server {
 	return srvStore.Get(c).(*Server)
 }
 
-var apiService = hateoas.Service{
-	Resources: []*hateoas.Resource{
-		root, version, status, plugins,
-	},
-	Use: []mohttp.Handler{
-		api.JSON,
-	},
-}
+var apiService = hateoas.NewService(
+	hateoas.AddResource(root, version, status, plugins),
+	hateoas.ServiceUse(api.JSON),
+)
 
 var root = hateoas.NewResource(
 	hateoas.Path("/"),

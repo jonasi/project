@@ -19,7 +19,7 @@ func New(sd string) *Server {
 		stateDir: stateDir(sd),
 	}
 
-	apiService.Use = append(apiService.Use, mohttp.StripPrefixHandler("/api"))
+	apiService.Use(mohttp.StripPrefixHandler("/api"))
 
 	s.registerRoutes(
 		webRoutes,
