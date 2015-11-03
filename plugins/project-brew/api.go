@@ -2,25 +2,46 @@ package main
 
 import (
 	"github.com/jonasi/mohttp"
+	"github.com/jonasi/mohttp/hateoas"
 	"github.com/jonasi/project/server/api"
 	"golang.org/x/net/context"
 )
 
-var GetVersion = mohttp.GET("/api/version", api.JSON, mohttp.JSONHandler(func(c context.Context) (interface{}, error) {
-	return LocalVersion()
-}))
+var apiService = hateoas.NewService(
+	hateoas.ServiceUse(api.JSON),
+	hateoas.AddResource(root, getVersion, listFormulae, getFormula),
+)
 
-var ListFormulae = mohttp.GET("/api/formulae", api.JSON, mohttp.JSONHandler(func(c context.Context) (interface{}, error) {
-	filter := mohttp.GetPathValues(c).Query.String("filter")
+var root = hateoas.NewResource(
+	hateoas.Path("/"),
+	hateoas.Link("version", getVersion),
+	hateoas.Link("formulae", listFormulae),
+)
 
-	if filter == "all" {
-		return ListAll()
-	}
+var getVersion = hateoas.NewResource(
+	hateoas.Path("/version"),
+	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
+		return LocalVersion()
+	})),
+)
 
-	return ListInstalled()
-}))
+var listFormulae = hateoas.NewResource(
+	hateoas.Path("/formulae"),
+	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
+		filter := mohttp.GetPathValues(c).Query.String("filter")
 
-var GetFormula = mohttp.GET("/api/formulae/:formula", api.JSON, mohttp.JSONHandler(func(c context.Context) (interface{}, error) {
-	name := mohttp.GetPathValues(c).Params.String("formula")
-	return Info(name)
-}))
+		if filter == "all" {
+			return ListAll()
+		}
+
+		return ListInstalled()
+	})),
+)
+
+var getFormula = hateoas.NewResource(
+	hateoas.Path("/formulae/:formula"),
+	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
+		name := mohttp.GetPathValues(c).Params.String("formula")
+		return Info(name)
+	})),
+)

@@ -10,11 +10,7 @@ const version = "0.0.1"
 func main() {
 	pl := plugin.New("brew", version)
 
-	pl.RegisterRoutes(
-		GetVersion,
-		ListFormulae,
-		GetFormula,
-	)
+	pl.RegisterAPI(apiService)
 
 	os.Exit(pl.RunCmd(os.Args))
 }

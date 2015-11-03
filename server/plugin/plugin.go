@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"github.com/jonasi/mohttp"
+	"github.com/jonasi/mohttp/hateoas"
 	"golang.org/x/net/context"
 	"gopkg.in/inconshreveable/log15.v2"
 	"path"
@@ -51,6 +52,13 @@ func (p *Plugin) RunCmd(args []string) int {
 
 func (p *Plugin) Use(handlers ...mohttp.Handler) {
 	p.server.Router().Use(handlers...)
+}
+
+func (p *Plugin) RegisterAPI(service *hateoas.Service) {
+	service.Use(mohttp.StripPrefixHandler("/api"))
+	routes := mohttp.Prefix("/api", service.Routes()...)
+
+	p.RegisterRoutes(routes...)
 }
 
 func (p *Plugin) RegisterRoutes(routes ...mohttp.Route) {
