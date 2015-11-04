@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"os/exec"
 	"sync"
 	"syscall"
@@ -42,13 +41,11 @@ func (c *Commander) GetRun(id int) *Run {
 
 func (c *Commander) Run(args ...string) (*Run, error) {
 	r := &Run{
-		runBase: runBase{
-			Cmd:       args[0],
-			Args:      []string{},
-			StartedAt: time.Now(),
-			ExitCode:  -1,
-			State:     "inprogress",
-		},
+		Cmd:       args[0],
+		Args:      []string{},
+		StartedAt: time.Now(),
+		ExitCode:  -1,
+		State:     "inprogress",
 	}
 
 	if len(args) > 1 {
@@ -94,30 +91,13 @@ func (c *Commander) Run(args ...string) (*Run, error) {
 	return r, nil
 }
 
-type runBase struct {
-	ID        int       `json:"id"`
-	Cmd       string    `json:"cmd"`
-	Args      []string  `json:"args"`
-	StartedAt time.Time `json:"started_at"`
-	State     string    `json:"state"`
-	ExitCode  int       `json:"exit_code"`
-}
-
 type Run struct {
-	runBase
-	Stdout bytes.Buffer
-	Stderr bytes.Buffer
-}
-
-func (r *Run) MarshalJSON() ([]byte, error) {
-	js := struct {
-		*runBase
-		Stdout []byte `json:"stdout"`
-		Stderr []byte `json:"stderr"`
-	}{runBase: &r.runBase}
-
-	js.Stdout = r.Stdout.Bytes()
-	js.Stderr = r.Stderr.Bytes()
-
-	return json.Marshal(js)
+	ID        int          `json:"id"`
+	Cmd       string       `json:"cmd"`
+	Args      []string     `json:"args"`
+	StartedAt time.Time    `json:"started_at"`
+	State     string       `json:"state"`
+	ExitCode  int          `json:"exit_code"`
+	Stdout    bytes.Buffer `json:"-"`
+	Stderr    bytes.Buffer `json:"-"`
 }

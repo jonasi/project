@@ -12,7 +12,14 @@ import (
 
 var apiService = hateoas.NewService(
 	hateoas.ServiceUse(api.JSON),
-	hateoas.AddResource(root, getCommands, getCommand, runCommand),
+	hateoas.AddResource(
+		root,
+		getCommands,
+		getCommand,
+		getCommandStdout,
+		getCommandStderr,
+		runCommand,
+	),
 )
 
 var root = hateoas.NewResource(
@@ -31,13 +38,51 @@ var getCommands = hateoas.NewResource(
 
 var getCommand = hateoas.NewResource(
 	hateoas.Path("/commands/:id"),
+	hateoas.AddLink("stdout", getCommandStdout),
+	hateoas.AddLink("stderr", getCommandStderr),
 	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
 		var (
-			id        = mohttp.GetPathValues(c).Params.Int("id")
-			commander = getValue(c)
+			id  = mohttp.GetPathValues(c).Params.Int("id")
+			run = getValue(c).GetRun(id)
 		)
 
-		return commander.GetRun(id), nil
+		if run == nil {
+			return nil, &mohttp.HTTPError{404, "Not Found"}
+		}
+
+		return run, nil
+	})),
+)
+
+var getCommandStdout = hateoas.NewResource(
+	hateoas.Path("/commands/:id/stdout"),
+	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
+		var (
+			id  = mohttp.GetPathValues(c).Params.Int("id")
+			run = getValue(c).GetRun(id)
+		)
+
+		if run == nil {
+			return nil, &mohttp.HTTPError{404, "Not Found"}
+		}
+
+		return run.Stdout.Bytes(), nil
+	})),
+)
+
+var getCommandStderr = hateoas.NewResource(
+	hateoas.Path("/commands/:id/stderr"),
+	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
+		var (
+			id  = mohttp.GetPathValues(c).Params.Int("id")
+			run = getValue(c).GetRun(id)
+		)
+
+		if run == nil {
+			return nil, &mohttp.HTTPError{404, "Not Found"}
+		}
+
+		return run.Stderr.Bytes(), nil
 	})),
 )
 

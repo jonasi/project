@@ -26,7 +26,7 @@ type Client struct {
 	host, port string
 }
 
-func (c *Client) Request(plugin, method, path string, body io.Reader) (*http.Response, error) {
+func (c *Client) Request(plugin, method, path string, body io.Reader) (*http.Request, *http.Response, error) {
 	if path[0] != '/' {
 		path = "/" + path
 	}
@@ -40,10 +40,11 @@ func (c *Client) Request(plugin, method, path string, body io.Reader) (*http.Res
 	req, err := http.NewRequest(method, path, body)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return c.http.Do(req)
+	resp, err := c.http.Do(req)
+	return req, resp, err
 }
 
 func (c *Client) Version() string {
