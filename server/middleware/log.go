@@ -6,7 +6,7 @@ import (
 )
 
 func LogRequest(l log15.Logger) mohttp.Handler {
-	return mohttp.Logger(func(st *mohttp.RequestStats) {
+	return mohttp.RequestLogger(func(st *mohttp.RequestSummary) {
 		l.Info("HTTP Request",
 			"start_time", st.StartTime,
 			"protocol", st.Protocol,

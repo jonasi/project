@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/jonasi/mohttp"
+	"github.com/jonasi/mohttp/hateoas"
 	"golang.org/x/net/context"
 )
 
@@ -18,3 +19,20 @@ var JSON = &mohttp.JSONOptions{
 		}
 	},
 }
+
+var AddLinkHeaders = mohttp.HandlerFunc(func(c context.Context) {
+	res, ok := hateoas.GetResource(c)
+
+	if ok {
+		var (
+			rw    = mohttp.GetResponseWriter(c)
+			links = res.Links()
+		)
+
+		for i := range links {
+			rw.Header().Add("Link", links[i].Header())
+		}
+	}
+
+	mohttp.Next(c)
+})

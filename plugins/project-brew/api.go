@@ -14,8 +14,8 @@ var apiService = hateoas.NewService(
 
 var root = hateoas.NewResource(
 	hateoas.Path("/"),
-	hateoas.Link("version", getVersion),
-	hateoas.Link("formulae", listFormulae),
+	hateoas.AddLink("version", getVersion),
+	hateoas.AddLink("formulae", listFormulae),
 )
 
 var getVersion = hateoas.NewResource(

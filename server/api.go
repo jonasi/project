@@ -15,14 +15,18 @@ func getServer(c context.Context) *Server {
 
 var apiService = hateoas.NewService(
 	hateoas.AddResource(root, version, status, plugins),
-	hateoas.ServiceUse(api.JSON),
+	hateoas.ServiceUse(api.JSON, api.AddLinkHeaders),
 )
 
 var root = hateoas.NewResource(
 	hateoas.Path("/"),
-	hateoas.Link("version", version),
-	hateoas.Link("status", status),
-	hateoas.Link("plugins", plugins),
+	hateoas.AddLink("version", version),
+	hateoas.AddLink("status", status),
+	hateoas.AddLink("plugins", plugins),
+	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
+		resource, _ := hateoas.GetResource(c)
+		return resource.Links(), nil
+	})),
 )
 
 var version = hateoas.NewResource(
