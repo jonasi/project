@@ -3,11 +3,12 @@ package api
 import (
 	"github.com/jonasi/mohttp"
 	"github.com/jonasi/mohttp/hateoas"
+	"github.com/jonasi/mohttp/middleware"
 	"golang.org/x/net/context"
 )
 
-var JSON = &mohttp.JSONOptions{
-	HandleErr: func(c context.Context, err error) interface{} {
+var JSON = mohttp.DataResponderHandler(&middleware.JSONResponder{
+	OnError: func(c context.Context, err error) interface{} {
 		return map[string]interface{}{
 			"error": err.Error(),
 		}
@@ -18,7 +19,7 @@ var JSON = &mohttp.JSONOptions{
 			"data": data,
 		}
 	},
-}
+})
 
 var AddLinkHeaders = mohttp.HandlerFunc(func(c context.Context) {
 	res, ok := hateoas.GetResource(c)

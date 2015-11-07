@@ -1,9 +1,9 @@
 package plugin
 
 import (
-	"github.com/jonasi/mohttp"
+	"github.com/jonasi/mohttp/middleware"
 	"github.com/jonasi/project/server/http"
-	"github.com/jonasi/project/server/middleware"
+	smiddleware "github.com/jonasi/project/server/middleware"
 	"gopkg.in/inconshreveable/log15.v2"
 	"html/template"
 	"net"
@@ -17,8 +17,8 @@ func NewServer(l log15.Logger) *Server {
 	t := template.Must(template.ParseGlob("server/templates/*"))
 
 	s.Use(
-		middleware.LogRequest(l),
-		mohttp.Template(t),
+		smiddleware.LogRequest(l),
+		middleware.Template(t),
 	)
 
 	return s

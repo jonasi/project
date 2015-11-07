@@ -26,7 +26,7 @@ type Client struct {
 	host, port string
 }
 
-func (c *Client) Request(plugin, method, path string, body io.Reader) (*http.Request, *http.Response, error) {
+func (c *Client) Request(plugin, method, path string, body io.Reader, h http.Header) (*http.Request, *http.Response, error) {
 	if path[0] != '/' {
 		path = "/" + path
 	}
@@ -41,6 +41,10 @@ func (c *Client) Request(plugin, method, path string, body io.Reader) (*http.Req
 
 	if err != nil {
 		return nil, nil, err
+	}
+
+	for k, v := range h {
+		req.Header[k] = append(req.Header[k], v...)
 	}
 
 	resp, err := c.http.Do(req)

@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/jonasi/mohttp"
 	"github.com/jonasi/mohttp/hateoas"
+	"github.com/jonasi/mohttp/middleware"
 	"github.com/jonasi/project/server/api"
 	"golang.org/x/net/context"
 )
@@ -23,15 +24,12 @@ var root = hateoas.NewResource(
 	hateoas.AddLink("version", version),
 	hateoas.AddLink("status", status),
 	hateoas.AddLink("plugins", plugins),
-	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
-		resource, _ := hateoas.GetResource(c)
-		return resource.Links(), nil
-	})),
+	hateoas.HEAD(mohttp.EmptyBodyHandler),
 )
 
 var version = hateoas.NewResource(
 	hateoas.Path("/version"),
-	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
+	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 		return Version, nil
 	})),
 )
@@ -43,7 +41,7 @@ var status = hateoas.NewResource(
 			Status string `json:"status"`
 		}
 
-		if err := mohttp.JSONBodyDecode(c, &body); err != nil {
+		if err := middleware.JSONBodyDecode(c, &body); err != nil {
 			mohttp.Error(c, "Internal Server Error", 500)
 			return
 		}
@@ -56,7 +54,7 @@ var status = hateoas.NewResource(
 
 var plugins = hateoas.NewResource(
 	hateoas.Path("/plugins"),
-	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
+	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 		var (
 			plugins = getServer(c).plugins
 			resp    = make([]pl, len(plugins))

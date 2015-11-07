@@ -3,6 +3,8 @@ package plugin
 import (
 	"github.com/jonasi/mohttp"
 	"github.com/jonasi/mohttp/hateoas"
+	"github.com/jonasi/mohttp/middleware"
+	"github.com/jonasi/project/server/api"
 	"golang.org/x/net/context"
 	"gopkg.in/inconshreveable/log15.v2"
 	"path"
@@ -55,8 +57,9 @@ func (p *Plugin) Use(handlers ...mohttp.Handler) {
 }
 
 func (p *Plugin) RegisterAPI(service *hateoas.Service) {
-	service.Use(mohttp.StripPrefixHandler("/api"))
-	routes := mohttp.Prefix("/api", service.Routes()...)
+	service.Use(middleware.StripPrefixHandler("/api"))
+	service.Use(api.AddLinkHeaders)
+	routes := middleware.Prefix("/api", service.Routes()...)
 
 	p.RegisterRoutes(routes...)
 }
@@ -84,20 +87,20 @@ func GetLogger(c context.Context) log15.Logger {
 	return GetPlugin(c).Logger
 }
 
-var getVersion = mohttp.GET("/version", mohttp.JSONHandler(func(c context.Context) (interface{}, error) {
-	p := GetPlugin(c)
-
-	return map[string]interface{}{"version": p.version}, nil
+var getVersion = mohttp.GET("/version", middleware.JSONHandler(func(c context.Context) (interface{}, error) {
+	return map[string]interface{}{
+		"version": GetPlugin(c).version,
+	}, nil
 }))
 
-var getAsset = mohttp.GET("/assets/*asset", mohttp.FileHandler(func(c context.Context) string {
+var getAsset = mohttp.GET("/assets/*asset", middleware.FileHandler(func(c context.Context) string {
 	p := GetPlugin(c)
 	return path.Join("plugins", "project-"+p.name, "web", "public", mohttp.GetPathValues(c).Params.String("asset"))
 }))
 
 var getIndex = mohttp.GET("/", mohttp.TemporaryRedirectHandler("web"))
 
-var getWeb = mohttp.GET("/web/*web", mohttp.TemplateHandler(func(c context.Context) (string, map[string]interface{}) {
+var getWeb = mohttp.GET("/web/*web", middleware.TemplateHandler(func(c context.Context) (string, map[string]interface{}) {
 	p := GetPlugin(c)
 	return "index.html", map[string]interface{}{
 		"script": "/plugins/" + p.name + "/assets/app.js",

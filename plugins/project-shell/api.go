@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jonasi/mohttp"
 	"github.com/jonasi/mohttp/hateoas"
+	"github.com/jonasi/mohttp/middleware"
 	"github.com/jonasi/project/server/api"
 	"github.com/jonasi/project/server/plugin"
 	"golang.org/x/net/context"
@@ -30,7 +31,7 @@ var root = hateoas.NewResource(
 
 var getCommands = hateoas.NewResource(
 	hateoas.Path("/commands"),
-	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
+	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 		commander := getValue(c)
 		return commander.History(), nil
 	})),
@@ -40,7 +41,7 @@ var getCommand = hateoas.NewResource(
 	hateoas.Path("/commands/:id"),
 	hateoas.AddLink("stdout", getCommandStdout),
 	hateoas.AddLink("stderr", getCommandStderr),
-	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
+	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 		var (
 			id  = mohttp.GetPathValues(c).Params.Int("id")
 			run = getValue(c).GetRun(id)
@@ -56,39 +57,51 @@ var getCommand = hateoas.NewResource(
 
 var getCommandStdout = hateoas.NewResource(
 	hateoas.Path("/commands/:id/stdout"),
-	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
-		var (
-			id  = mohttp.GetPathValues(c).Params.Int("id")
-			run = getValue(c).GetRun(id)
-		)
+	hateoas.GET(
+		middleware.AcceptHandlers{
+			"text/plain":               mohttp.DataResponderHandler(&middleware.TextResponder{}),
+			"application/octet-stream": mohttp.DataResponderHandler(&middleware.TextResponder{}),
+		},
+		mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
+			var (
+				id  = mohttp.GetPathValues(c).Params.Int("id")
+				run = getValue(c).GetRun(id)
+			)
 
-		if run == nil {
-			return nil, &mohttp.HTTPError{404, "Not Found"}
-		}
+			if run == nil {
+				return "", &mohttp.HTTPError{404, "Not Found"}
+			}
 
-		return run.Stdout.Bytes(), nil
-	})),
+			return &run.Stdout, nil
+		}),
+	),
 )
 
 var getCommandStderr = hateoas.NewResource(
 	hateoas.Path("/commands/:id/stderr"),
-	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
-		var (
-			id  = mohttp.GetPathValues(c).Params.Int("id")
-			run = getValue(c).GetRun(id)
-		)
+	hateoas.GET(
+		middleware.AcceptHandlers{
+			"text/plain":               mohttp.DataResponderHandler(&middleware.TextResponder{}),
+			"application/octet-stream": mohttp.DataResponderHandler(&middleware.TextResponder{}),
+		},
+		mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
+			var (
+				id  = mohttp.GetPathValues(c).Params.Int("id")
+				run = getValue(c).GetRun(id)
+			)
 
-		if run == nil {
-			return nil, &mohttp.HTTPError{404, "Not Found"}
-		}
+			if run == nil {
+				return nil, &mohttp.HTTPError{404, "Not Found"}
+			}
 
-		return run.Stderr.Bytes(), nil
-	})),
+			return &run.Stderr, nil
+		}),
+	),
 )
 
 var runCommand = hateoas.NewResource(
 	hateoas.Path("/commands"),
-	hateoas.POST(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
+	hateoas.POST(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 		var (
 			logger    = plugin.GetLogger(c)
 			commander = getValue(c)

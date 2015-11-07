@@ -8,8 +8,9 @@ import (
 
 	"github.com/camlistore/lock"
 	"github.com/jonasi/mohttp"
+	"github.com/jonasi/mohttp/middleware"
 	"github.com/jonasi/project/server/http"
-	"github.com/jonasi/project/server/middleware"
+	smiddleware "github.com/jonasi/project/server/middleware"
 	"gopkg.in/inconshreveable/log15.v2"
 )
 
@@ -19,19 +20,19 @@ func New(sd string) *Server {
 		stateDir: stateDir(sd),
 	}
 
-	apiService.Use(mohttp.StripPrefixHandler("/api"))
+	apiService.Use(middleware.StripPrefixHandler("/api"))
 
 	s.registerRoutes(
 		webRoutes,
-		mohttp.Prefix("/api", apiService.Routes()...),
+		middleware.Prefix("/api", apiService.Routes()...),
 	)
 
 	t := template.Must(template.ParseGlob("server/templates/*"))
 
 	s.Use(
-		middleware.LogRequest(s.Logger),
+		smiddleware.LogRequest(s.Logger),
 		srvContextHandler(s),
-		mohttp.Template(t),
+		middleware.Template(t),
 	)
 
 	return s
@@ -87,6 +88,18 @@ func (s *Server) Listen(addr string) error {
 	}
 
 	return s.Server.Listen(addr)
+}
+
+func (s *Server) Close() {
+	s.Info("Shutting down")
+	s.Server.Close()
+
+	for name, p := range s.plugins {
+		if p.cmd != nil && p.cmd.Process != nil {
+			s.Info("Shutting down plugin", "plugin", name, "pid", p.cmd.Process.Pid)
+			p.cmd.Process.Kill()
+		}
+	}
 }
 
 type Config struct {

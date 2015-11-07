@@ -9,6 +9,7 @@ const version = "0.0.1"
 
 func main() {
 	pl := plugin.New("system", version)
+	pl.RegisterAPI(apiService)
 
 	os.Exit(pl.RunCmd(os.Args))
 }

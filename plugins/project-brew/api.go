@@ -20,14 +20,14 @@ var root = hateoas.NewResource(
 
 var getVersion = hateoas.NewResource(
 	hateoas.Path("/version"),
-	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
+	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 		return LocalVersion()
 	})),
 )
 
 var listFormulae = hateoas.NewResource(
 	hateoas.Path("/formulae"),
-	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
+	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 		filter := mohttp.GetPathValues(c).Query.String("filter")
 
 		if filter == "all" {
@@ -40,7 +40,7 @@ var listFormulae = hateoas.NewResource(
 
 var getFormula = hateoas.NewResource(
 	hateoas.Path("/formulae/:formula"),
-	hateoas.GET(mohttp.DataHandler(func(c context.Context) (interface{}, error) {
+	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 		name := mohttp.GetPathValues(c).Params.String("formula")
 		return Info(name)
 	})),

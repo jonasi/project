@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/jonasi/mohttp"
+	"github.com/jonasi/mohttp/middleware"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -26,6 +27,7 @@ type plugin struct {
 	path    string
 	client  *http.Client
 	proxy   *httputil.ReverseProxy
+	cmd     *exec.Cmd
 	version string
 }
 
@@ -66,12 +68,12 @@ func (p *plugin) initialize(sd stateDir) error {
 		return err
 	}
 
-	cmd := exec.Command(p.path, "--location="+sockFile, "--statedir="+pluginStateDir, "--verbose")
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	p.cmd = exec.Command(p.path, "--location="+sockFile, "--statedir="+pluginStateDir, "--verbose")
+	p.cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	p.cmd.Stdout = os.Stdout
+	p.cmd.Stderr = os.Stderr
 
-	if err := cmd.Start(); err != nil {
+	if err := p.cmd.Start(); err != nil {
 		return err
 	}
 
@@ -84,7 +86,7 @@ func (p *plugin) initialize(sd stateDir) error {
 	)
 
 	go func() {
-		waitCh <- cmd.Wait()
+		waitCh <- p.cmd.Wait()
 	}()
 
 	go func() {
@@ -126,7 +128,7 @@ func (p *plugin) Routes() []mohttp.Route {
 
 	return mohttp.ALL(
 		prefix+"/*splat",
-		mohttp.StripPrefixHandler(prefix),
+		middleware.StripPrefixHandler(prefix),
 		mohttp.FromHTTPHandler(p.proxy),
 	)
 }
