@@ -45,7 +45,7 @@ func (p *Plugin) RunCmd(args []string) int {
 
 	p.stateDir = p.cmd.flags.statedir
 
-	p.Use(plMiddleware(p))
+	p.Use(setPlugin(p))
 	p.server.Register(getWeb, getIndex, getAsset, getVersion)
 	p.server.Register(p.routes...)
 
@@ -77,10 +77,10 @@ func (p *Plugin) StateDir(paths ...string) string {
 	return filepath.Join(paths...)
 }
 
-var plMiddleware, store = mohttp.NewContextValuePair("github.com/jonasi/project/plugin.Plugin")
+var setPlugin, getPlugin = mohttp.ContextValueAccessors("github.com/jonasi/project/plugin.Plugin")
 
 func GetPlugin(c context.Context) *Plugin {
-	return store.Get(c).(*Plugin)
+	return getPlugin(c).(*Plugin)
 }
 
 func GetLogger(c context.Context) log15.Logger {

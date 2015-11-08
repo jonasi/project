@@ -8,10 +8,10 @@ import (
 	"golang.org/x/net/context"
 )
 
-var srvContextHandler, srvStore = mohttp.NewContextValuePair("github.com/jonasi/project/server.Server")
+var setSrv, getSrv = mohttp.ContextValueAccessors("github.com/jonasi/project/server.Server")
 
 func getServer(c context.Context) *Server {
-	return srvStore.Get(c).(*Server)
+	return getSrv(c).(*Server)
 }
 
 var apiService = hateoas.NewService(

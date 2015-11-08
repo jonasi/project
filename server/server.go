@@ -31,7 +31,7 @@ func New(sd string) *Server {
 
 	s.Use(
 		smiddleware.LogRequest(s.Logger),
-		srvContextHandler(s),
+		setSrv(s),
 		middleware.Template(t),
 	)
 

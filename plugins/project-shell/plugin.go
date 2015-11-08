@@ -10,17 +10,17 @@ import (
 
 const version = "0.0.1"
 
-var handler, store = mohttp.NewContextValuePair("github.com/jonasi/project/plugins/project-shell")
+var setCmd, getCmd = mohttp.ContextValueAccessors("github.com/jonasi/project/plugins/project-shell")
 
 func getCommander(c context.Context) *Commander {
-	return store.Get(c).(*Commander)
+	return getCmd(c).(*Commander)
 }
 
 func main() {
 	pl := plugin.New("shell", version)
 
 	pl.Use(
-		handler(NewCommander()),
+		setCmd(NewCommander()),
 	)
 
 	pl.RegisterAPI(apiService)

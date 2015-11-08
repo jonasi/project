@@ -3,8 +3,10 @@ package main
 import (
 	"github.com/jonasi/mohttp"
 	"github.com/jonasi/mohttp/hateoas"
+	"github.com/jonasi/mohttp/middleware"
 	"github.com/jonasi/project/server/api"
 	"golang.org/x/net/context"
+	"time"
 )
 
 var apiService = hateoas.NewService(
@@ -27,15 +29,20 @@ var getVersion = hateoas.NewResource(
 
 var listFormulae = hateoas.NewResource(
 	hateoas.Path("/formulae"),
-	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
-		filter := mohttp.GetPathValues(c).Query.String("filter")
+	hateoas.GET(
+		&middleware.TimedCache{
+			Duration: time.Minute,
+		},
+		mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
+			filter := mohttp.GetPathValues(c).Query.String("filter")
 
-		if filter == "all" {
-			return ListAll()
-		}
+			if filter == "all" {
+				return ListAll()
+			}
 
-		return ListInstalled()
-	})),
+			return ListInstalled()
+		}),
+	),
 )
 
 var getFormula = hateoas.NewResource(
