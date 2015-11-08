@@ -1,6 +1,6 @@
 import { Component, PropTypes } from 'react';
 
-const { any } = PropTypes;
+const { any, node } = PropTypes;
 
 export default function(props) {
     const ctxt = Object.assign({}, props);
@@ -14,6 +14,10 @@ export default function(props) {
 
     return class extends Component {
         static childContextTypes = types
+
+        static propTypes = {
+            children: node,
+        }
 
         getChildContext() {
             return ctxt;
