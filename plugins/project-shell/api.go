@@ -32,7 +32,7 @@ var root = hateoas.NewResource(
 var getCommands = hateoas.NewResource(
 	hateoas.Path("/commands"),
 	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
-		commander := getValue(c)
+		commander := getCommander(c)
 		return commander.History(), nil
 	})),
 )
@@ -44,7 +44,7 @@ var getCommand = hateoas.NewResource(
 	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 		var (
 			id  = mohttp.GetPathValues(c).Params.Int("id")
-			run = getValue(c).GetRun(id)
+			run = getCommander(c).GetRun(id)
 		)
 
 		if run == nil {
@@ -58,14 +58,11 @@ var getCommand = hateoas.NewResource(
 var getCommandStdout = hateoas.NewResource(
 	hateoas.Path("/commands/:id/stdout"),
 	hateoas.GET(
-		middleware.AcceptHandlers{
-			"text/plain":               mohttp.DataResponderHandler(&middleware.TextResponder{}),
-			"application/octet-stream": mohttp.DataResponderHandler(&middleware.TextResponder{}),
-		},
+		mohttp.DataResponderHandler(&middleware.DetectTypeResponder{}),
 		mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 			var (
 				id  = mohttp.GetPathValues(c).Params.Int("id")
-				run = getValue(c).GetRun(id)
+				run = getCommander(c).GetRun(id)
 			)
 
 			if run == nil {
@@ -80,14 +77,11 @@ var getCommandStdout = hateoas.NewResource(
 var getCommandStderr = hateoas.NewResource(
 	hateoas.Path("/commands/:id/stderr"),
 	hateoas.GET(
-		middleware.AcceptHandlers{
-			"text/plain":               mohttp.DataResponderHandler(&middleware.TextResponder{}),
-			"application/octet-stream": mohttp.DataResponderHandler(&middleware.TextResponder{}),
-		},
+		mohttp.DataResponderHandler(&middleware.DetectTypeResponder{}),
 		mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 			var (
 				id  = mohttp.GetPathValues(c).Params.Int("id")
-				run = getValue(c).GetRun(id)
+				run = getCommander(c).GetRun(id)
 			)
 
 			if run == nil {
@@ -104,7 +98,7 @@ var runCommand = hateoas.NewResource(
 	hateoas.POST(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 		var (
 			logger    = plugin.GetLogger(c)
-			commander = getValue(c)
+			commander = getCommander(c)
 		)
 
 		var args struct {

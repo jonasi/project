@@ -4,8 +4,10 @@ import (
 	"github.com/jonasi/mohttp"
 	"gopkg.in/inconshreveable/log15.v2"
 	"gopkg.in/tylerb/graceful.v1"
+	"log"
 	"net"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -18,7 +20,8 @@ func NewServer(l log15.Logger) *Server {
 		Logger: l,
 		http: graceful.Server{
 			Server: &http.Server{
-				Handler: mohttp.NewRouter(),
+				Handler:  mohttp.NewRouter(),
+				ErrorLog: log.New(os.Stderr, "HTTP: ", log.LstdFlags),
 			},
 		},
 		stopCh: make(chan struct{}),

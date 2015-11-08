@@ -12,7 +12,7 @@ const version = "0.0.1"
 
 var handler, store = mohttp.NewContextValuePair("github.com/jonasi/project/plugins/project-shell")
 
-func getValue(c context.Context) *Commander {
+func getCommander(c context.Context) *Commander {
 	return store.Get(c).(*Commander)
 }
 
