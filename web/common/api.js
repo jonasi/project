@@ -9,8 +9,28 @@ const { object } = PropTypes;
 const { fetch } = window;
 
 export default class API {
-    call(...args) {
-        return fetch(...args).then(d => d.json()).then(d => {
+    get(path, options = {}) {
+        options.method = 'GET';
+        return this.call(path, options);
+    }
+
+    post(path, options = {}) {
+        options.method = 'POST';
+        return this.call(path, options);
+    }
+
+    put(path, options = {}) {
+        options.method = 'PUT';
+        return this.call(path, options);
+    }
+
+    delete(path, options = {}) {
+        options.method = 'DELETE';
+        return this.call(path, options);
+    }
+
+    call(path, options = {}) {
+        return fetch(path, options).then(d => d.json()).then(d => {
             if (d.error) {
                 throw new Error(d.error);
             }
