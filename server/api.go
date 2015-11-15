@@ -42,7 +42,7 @@ var status = hateoas.NewResource(
 		}
 
 		if err := middleware.JSONBodyDecode(c, &body); err != nil {
-			mohttp.Error(c, "Internal Server Error", 500)
+			mohttp.GetResponseWriter(c).WriteHeader(500)
 			return
 		}
 

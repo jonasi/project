@@ -10,58 +10,6 @@ import (
 	"github.com/jonasi/project/server/exec"
 )
 
-type Formula struct {
-	Name        string `json:"name"`
-	FullName    string `json:"full_name"`
-	Version     string `json:"version"`
-	Description string `json:"desc"`
-	Homepage    string `json:"homepage"`
-	OldName     string `json:"oldname"`
-	Versions    struct {
-		Stable string `json:"stable"`
-		Bottle bool   `json:"bottle"`
-		Devel  string `json:"devel"`
-		HEAD   string `json:"head"`
-	} `json:"versions"`
-	Revision  int `json:"revision"`
-	Installed []struct {
-		Version          string   `json:"version"`
-		UsedOptions      []string `json:"used_options"`
-		BuiltAsBottle    bool     `json:"built_as_bottle"`
-		PouredFromBottle bool     `json:"poured_from_bottle"`
-	} `json:"installed"`
-	LinkedKeg     string   `json:"linked_keg"`
-	KegOnly       bool     `json:"keg_only"`
-	Dependencies  []string `json:"dependecies"`
-	ConflictsWith []string `json:"conflicts_with"`
-	Caveats       string   `json:"caveats"`
-	Requirements  []struct {
-		Name           string `json:"name"`
-		DefaultFormula string `json:"default_formula"`
-		Cask           string `json:"cask"`
-		Download       string `json:"download"`
-	} `json:"requirements"`
-	Options []struct {
-		Option      string `json:"option"`
-		Description string `json:"description"`
-	} `json:"options"`
-	Bottle map[string]struct {
-		Revision int    `json:"revision"`
-		Cellar   string `json:"cellar"`
-		Prefix   string `json:"prefix"`
-		RootURL  string `json:"root_url"`
-		Files    map[string]struct {
-			URL    string `json:"url"`
-			Sha256 string `json:"sha256"`
-		} `json:"files"`
-	} `json:"bottle"`
-}
-
-type Version struct {
-	Version  string `json:"version"`
-	Revision string `json:"revision"`
-}
-
 func LocalVersion() (*Version, error) {
 	var (
 		v   Version
@@ -173,4 +121,56 @@ func dir() (string, error) {
 	}
 
 	return filepath.Join(str, "Library", "Formula"), nil
+}
+
+type Formula struct {
+	Name        string `json:"name"`
+	FullName    string `json:"full_name"`
+	Version     string `json:"version"`
+	Description string `json:"desc"`
+	Homepage    string `json:"homepage"`
+	OldName     string `json:"oldname"`
+	Versions    struct {
+		Stable string `json:"stable"`
+		Bottle bool   `json:"bottle"`
+		Devel  string `json:"devel"`
+		HEAD   string `json:"head"`
+	} `json:"versions"`
+	Revision  int `json:"revision"`
+	Installed []struct {
+		Version          string   `json:"version"`
+		UsedOptions      []string `json:"used_options"`
+		BuiltAsBottle    bool     `json:"built_as_bottle"`
+		PouredFromBottle bool     `json:"poured_from_bottle"`
+	} `json:"installed"`
+	LinkedKeg     string   `json:"linked_keg"`
+	KegOnly       bool     `json:"keg_only"`
+	Dependencies  []string `json:"dependecies"`
+	ConflictsWith []string `json:"conflicts_with"`
+	Caveats       string   `json:"caveats"`
+	Requirements  []struct {
+		Name           string `json:"name"`
+		DefaultFormula string `json:"default_formula"`
+		Cask           string `json:"cask"`
+		Download       string `json:"download"`
+	} `json:"requirements"`
+	Options []struct {
+		Option      string `json:"option"`
+		Description string `json:"description"`
+	} `json:"options"`
+	Bottle map[string]struct {
+		Revision int    `json:"revision"`
+		Cellar   string `json:"cellar"`
+		Prefix   string `json:"prefix"`
+		RootURL  string `json:"root_url"`
+		Files    map[string]struct {
+			URL    string `json:"url"`
+			Sha256 string `json:"sha256"`
+		} `json:"files"`
+	} `json:"bottle"`
+}
+
+type Version struct {
+	Version  string `json:"version"`
+	Revision string `json:"revision"`
 }

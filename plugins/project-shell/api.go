@@ -48,7 +48,7 @@ var getCommand = hateoas.NewResource(
 		)
 
 		if run == nil {
-			return nil, &mohttp.HTTPError{404, "Not Found"}
+			return nil, mohttp.HTTPError(404)
 		}
 
 		return run, nil
@@ -66,7 +66,7 @@ var getCommandStdout = hateoas.NewResource(
 			)
 
 			if run == nil {
-				return "", &mohttp.HTTPError{404, "Not Found"}
+				return "", mohttp.HTTPError(404)
 			}
 
 			return &run.Stdout, nil
@@ -85,7 +85,7 @@ var getCommandStderr = hateoas.NewResource(
 			)
 
 			if run == nil {
-				return nil, &mohttp.HTTPError{404, "Not Found"}
+				return nil, mohttp.HTTPError(404)
 			}
 
 			return &run.Stderr, nil
