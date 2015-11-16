@@ -43,7 +43,7 @@ var getCommand = hateoas.NewResource(
 	hateoas.AddLink("stderr", getCommandStderr),
 	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 		var (
-			id  = mohttp.GetPathValues(c).Params.Int("id")
+			id  = mohttp.GetPathValues(c).Params.String("id")
 			run = getCommander(c).GetRun(id)
 		)
 
@@ -61,7 +61,7 @@ var getCommandStdout = hateoas.NewResource(
 		mohttp.DataResponderHandler(&middleware.DetectTypeResponder{}),
 		mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 			var (
-				id  = mohttp.GetPathValues(c).Params.Int("id")
+				id  = mohttp.GetPathValues(c).Params.String("id")
 				run = getCommander(c).GetRun(id)
 			)
 
@@ -80,7 +80,7 @@ var getCommandStderr = hateoas.NewResource(
 		mohttp.DataResponderHandler(&middleware.DetectTypeResponder{}),
 		mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 			var (
-				id  = mohttp.GetPathValues(c).Params.Int("id")
+				id  = mohttp.GetPathValues(c).Params.String("id")
 				run = getCommander(c).GetRun(id)
 			)
 

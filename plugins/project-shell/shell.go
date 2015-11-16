@@ -2,24 +2,35 @@ package main
 
 import (
 	"bytes"
+	"github.com/jonasi/project/server/id"
+	"os"
 	"os/exec"
 	"sync"
 	"syscall"
 	"time"
 )
 
-func NewCommander() *Commander {
+func NewCommander(dir string) *Commander {
 	return &Commander{
-		sl: []*Run{},
-		mp: map[int]*Run{},
+		dir: dir,
+		sl:  []*Run{},
+		mp:  map[string]*Run{},
 	}
 }
 
 type Commander struct {
-	idCounter int
-	sl        []*Run
-	mp        map[int]*Run
-	mu        sync.RWMutex
+	dir string
+	sl  []*Run
+	mp  map[string]*Run
+	mu  sync.RWMutex
+}
+
+func (c *Commander) Init() error {
+	if err := os.MkdirAll(c.dir, 0755); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *Commander) History() []*Run {
@@ -32,7 +43,7 @@ func (c *Commander) History() []*Run {
 	return sl
 }
 
-func (c *Commander) GetRun(id int) *Run {
+func (c *Commander) GetRun(id string) *Run {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -41,6 +52,7 @@ func (c *Commander) GetRun(id int) *Run {
 
 func (c *Commander) Run(args ...string) (*Run, error) {
 	r := &Run{
+		ID:        id.New(),
 		Cmd:       args[0],
 		Args:      []string{},
 		StartedAt: time.Now(),
@@ -62,15 +74,13 @@ func (c *Commander) Run(args ...string) (*Run, error) {
 
 	c.mu.Lock()
 
-	r.ID = c.idCounter
-	c.idCounter++
-	c.mp[r.ID] = r
+	c.mp[r.ID.String()] = r
 	c.sl = append(c.sl, r)
 
 	diff := len(c.sl) - 1000
 	if diff > 0 {
 		for i := 0; i < diff; i++ {
-			delete(c.mp, c.sl[i].ID)
+			delete(c.mp, c.sl[i].ID.String())
 		}
 
 		c.sl = c.sl[diff:]
@@ -92,7 +102,7 @@ func (c *Commander) Run(args ...string) (*Run, error) {
 }
 
 type Run struct {
-	ID        int          `json:"id"`
+	ID        id.ID        `json:"id"`
 	Cmd       string       `json:"cmd"`
 	Args      []string     `json:"args"`
 	StartedAt time.Time    `json:"started_at"`

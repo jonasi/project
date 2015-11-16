@@ -19,11 +19,22 @@ func getCommander(c context.Context) *Commander {
 func main() {
 	pl := plugin.New("shell", version)
 
-	pl.Use(
-		setCmd(NewCommander()),
-	)
-
 	pl.RegisterAPI(apiService)
 
-	os.Exit(pl.RunCmd(os.Args))
+	if code := pl.Parse(os.Args); code > 0 {
+		os.Exit(code)
+	}
+
+	cmder := NewCommander(pl.StatePath("commands"))
+
+	if err := cmder.Init(); err != nil {
+		pl.Error("Commander init error", "error", err)
+		os.Exit(1)
+	}
+
+	pl.Use(
+		setCmd(cmder),
+	)
+
+	os.Exit(pl.Run())
 }

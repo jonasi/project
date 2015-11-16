@@ -37,7 +37,7 @@ type Plugin struct {
 	cmd      *Cmd
 }
 
-func (p *Plugin) RunCmd(args []string) int {
+func (p *Plugin) Parse(args []string) int {
 	if err := p.cmd.ParseArgs(args); err != nil {
 		p.Error("Parse args error", "error", err)
 		return 1
@@ -45,11 +45,23 @@ func (p *Plugin) RunCmd(args []string) int {
 
 	p.stateDir = p.cmd.flags.statedir
 
+	return 0
+}
+
+func (p *Plugin) Run() int {
 	p.Use(setPlugin(p))
 	p.server.Register(getWeb, getIndex, getAsset, getVersion)
 	p.server.Register(p.routes...)
 
 	return p.cmd.Run()
+}
+
+func (p *Plugin) RunCmd(args []string) int {
+	if code := p.Parse(args); code > 0 {
+		return code
+	}
+
+	return p.Run()
 }
 
 func (p *Plugin) Use(handlers ...mohttp.Handler) {
@@ -68,7 +80,7 @@ func (p *Plugin) RegisterRoutes(routes ...mohttp.Route) {
 	p.routes = append(p.routes, routes...)
 }
 
-func (p *Plugin) StateDir(paths ...string) string {
+func (p *Plugin) StatePath(paths ...string) string {
 	if len(paths) == 0 {
 		return p.stateDir
 	}

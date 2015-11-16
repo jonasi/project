@@ -29,9 +29,7 @@ var root = hateoas.NewResource(
 
 var version = hateoas.NewResource(
 	hateoas.Path("/version"),
-	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
-		return Version, nil
-	})),
+	hateoas.GET(mohttp.StaticDataHandler(Version)),
 )
 
 var status = hateoas.NewResource(
