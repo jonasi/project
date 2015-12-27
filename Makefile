@@ -20,7 +20,12 @@ npm_install:
 	cd $(WEB_DIR) && npm install
 
 js:
-	NODE_ENV=$(if $(DEBUG),development,production) webpack --config $(WEB_DIR)/app/webpack.config.js --progress --colors --display-error-details $(WEBPACK_ARGS)
+	NODE_ENV=$(if $(DEBUG),development,production) webpack \
+		--config $(WEB_DIR)/app/webpack.config.js \
+		--progress \
+		--colors \
+		--display-error-details \
+		$(WEBPACK_ARGS)
 
 js_watch:
 	$(MAKE) js WEBPACK_ARGS=--watch
@@ -35,5 +40,10 @@ plugin_js_%_watch:
 	$(MAKE) plugin_js_$* WEBPACK_ARGS=--watch
 
 plugin_js_%:
-	NODE_ENV=$(if $(DEBUG),development,production) webpack --config $(ROOT_DIR)/plugins/project-$*/web/webpack.config.js --progress --colors --display-error-details $(WEBPACK_ARGS)
+	NODE_ENV=$(if $(DEBUG),development,production) webpack \
+		--config $(ROOT_DIR)/plugins/project-$*/web/webpack.config.js \
+		--progress \
+		--colors \
+		--display-error-details \
+		$(WEBPACK_ARGS)
 

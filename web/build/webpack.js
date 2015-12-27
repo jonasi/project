@@ -26,7 +26,7 @@ exports.baseConfig = function(baseDir) {
             ],
 
             loaders: [
-                { test: /\.js$/, exclude: /node_modules/, loader: 'babel?optional[]=runtime' },
+                { test: /\.js$/, exclude: /node_modules/, loader: 'babel' },
                 { test: /\.css$/, exclude: /node_modules/, loader: 'style!css?modules&importLoaders&localIdentName=[name]__[local]___[hash:base64:10]!postcss' },
                 { test: /\.css$/, include: /node_modules/, loader: 'style!css' },
                 { test: /\.woff($|\?)/, loader: 'url-loader?limit=10000' },

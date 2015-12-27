@@ -19,6 +19,7 @@ func NewServer(l log15.Logger) *Server {
 	return &Server{
 		Logger: l,
 		http: graceful.Server{
+			Timeout: 2 * time.Second,
 			Server: &http.Server{
 				Handler:  mohttp.NewRouter(),
 				ErrorLog: log.New(os.Stderr, "HTTP: ", log.LstdFlags),
