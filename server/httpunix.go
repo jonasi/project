@@ -35,10 +35,14 @@ func (rt *rpTripper) RoundTrip(r *http.Request) (*http.Response, error) {
 		return resp, err
 	}
 
-	// rewrite header to be
+	// rewrite location header to be relative, if necessary
 	if l := resp.Header.Get("Location"); l != "" {
 		resp.Header.Set("Location", rt.prefix+l)
 	}
+
+	// hack: remove Content-Length header before RT returns
+	// otherwise it's impossible to remove/change from resp
+	resp.Header.Del("Content-Length")
 
 	return resp, nil
 }

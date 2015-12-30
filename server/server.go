@@ -16,7 +16,7 @@ import (
 
 func New(sd string) *Server {
 	s := &Server{
-		Server:   http.NewServer(log15.New()),
+		Server:   http.NewServer(log15.New("pid", os.Getpid())),
 		stateDir: stateDir(sd),
 	}
 

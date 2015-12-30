@@ -70,13 +70,13 @@ function comp(Comp, vals) {
     let results = Map();
 
     for (const k in vals) {
-        if (typeof vals[k] === 'string') {
+        if (typeof vals[k] === 'function' || typeof vals[k] === 'string') {
             vals[k] = { path: vals[k], initialValue: void 0 };
         }
 
         if (typeof vals[k].path === 'string') {
-            const old = vals[k].path;
-            vals[k].path = () => old;
+            const path = vals[k].path;
+            vals[k].path = () => path;
         }
 
         results = results.set(k, new ValueState({
@@ -84,7 +84,10 @@ function comp(Comp, vals) {
         }));
     }
 
-    return class APIComponent extends Component {
+    return class extends Component {
+        static Comp = Comp
+        static displayName = 'APIComponent(' + (Comp.name || Comp.displayName) + ')'
+
         static contextTypes = {
             api: object.isRequired,
         }
@@ -97,11 +100,11 @@ function comp(Comp, vals) {
 
         componentWillMount() {
             const { api } = this.context;
-            const { results } = this.state;
+            let { results } = this.state;
 
             for (const k in vals) {
                 const path = vals[k].path(this.props);
-                results.set(k, results.get(k).setLoading());
+                results = results.set(k, results.get(k).setLoading());
 
                 api.call(path, {
                     method: 'get',

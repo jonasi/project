@@ -7,12 +7,13 @@ import (
 	"github.com/jonasi/project/server/api"
 	"golang.org/x/net/context"
 	"gopkg.in/inconshreveable/log15.v2"
+	"os"
 	"path"
 	"path/filepath"
 )
 
 func New(name, version string) *Plugin {
-	l := log15.New("plugin", name)
+	l := log15.New("pid", os.Getpid(), "plugin", name)
 	l.SetHandler(log15.LvlFilterHandler(log15.LvlError, log15.StderrHandler))
 
 	s := NewServer(l)

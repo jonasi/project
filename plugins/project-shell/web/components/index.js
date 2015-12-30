@@ -8,7 +8,7 @@ import { runCommand, getHistory } from '../actions';
     pending: state.get('pending'),
     commands: state.get('commands'),
 }))
-export default class extends Component {
+export default class Shell extends Component {
     static propTypes = {
         dispatch: React.PropTypes.func,
         pending: React.PropTypes.object,

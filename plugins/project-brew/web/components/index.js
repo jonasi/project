@@ -9,13 +9,23 @@ import brewImgURL from '../img/brew.png';
 
 const { object } = PropTypes;
 
+@api({
+    version: { path: '/plugins/brew/api/version', initialValue: {} },
+})
 export default class extends Component {
+    static propTypes = {
+        version: object.isRequired,
+    }
+
     render() {
+        const { version } = this.props;
+
         return (
             <div className={ brew }>
                 <a href="http://brew.sh/" target="__blank">
                     <img src={ brewImgURL } />
                 </a>
+                { version.value.version } { version.value.revision }
                 <Tabs>
                     <Tab id="installed" label="Installed" renderFn={ () => <Installed /> } />
                     <Tab id="all" label="All" renderFn={ () => <All /> } />
@@ -28,7 +38,7 @@ export default class extends Component {
 @api({
     formulae: {
         initialValue: [],
-        path: () => '/plugins/brew/api/formulae?filter=installed',
+        path: '/plugins/brew/api/formulae?filter=installed',
     },
 })
 class Installed extends Component {
@@ -45,7 +55,7 @@ class Installed extends Component {
 @api({
     formulae: {
         initialValue: [],
-        path: () => '/plugins/brew/api/formulae?filter=all',
+        path: '/plugins/brew/api/formulae?filter=all',
     },
 })
 class All extends Component {

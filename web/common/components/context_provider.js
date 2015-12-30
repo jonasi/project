@@ -12,7 +12,9 @@ export default function(props) {
         types[k] = any.isRequired;
     }
 
-    return class extends Component {
+    return class ContextProvider extends Component {
+        static displayName = 'ContextProvider(' + Object.keys(props).join(', ') + ')'
+
         static childContextTypes = types
 
         static propTypes = {

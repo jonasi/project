@@ -69,7 +69,7 @@ var getCommandStdout = hateoas.NewResource(
 				return "", mohttp.HTTPError(404)
 			}
 
-			return &run.Stdout, nil
+			return run.Stdout()
 		}),
 	),
 )
@@ -88,7 +88,7 @@ var getCommandStderr = hateoas.NewResource(
 				return nil, mohttp.HTTPError(404)
 			}
 
-			return &run.Stderr, nil
+			return run.Stderr()
 		}),
 	),
 )

@@ -41,7 +41,13 @@ func (i ID) MarshalJSON() ([]byte, error) {
 }
 
 func (i *ID) UnmarshalJSON(b []byte) error {
-	id, err := FromString(string(b))
+	var s string
+
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+
+	id, err := FromString(s)
 
 	if err != nil {
 		return err

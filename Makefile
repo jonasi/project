@@ -33,13 +33,13 @@ js_watch:
 server:
 	$(GOENV) time go install -v
 
-plugins:
+plugins_server:
 	$(GOENV) time go install -v ./plugins/...
 
-plugin_js_%_watch:
-	$(MAKE) plugin_js_$* WEBPACK_ARGS=--watch
+plugin_%_server:
+	$(GOENV) time go install -v ./plugins/project-$*
 
-plugin_js_%:
+plugin_%_js:
 	NODE_ENV=$(if $(DEBUG),development,production) webpack \
 		--config $(ROOT_DIR)/plugins/project-$*/web/webpack.config.js \
 		--progress \
@@ -47,3 +47,5 @@ plugin_js_%:
 		--display-error-details \
 		$(WEBPACK_ARGS)
 
+plugin_%_js_watch:
+	$(MAKE) plugin_$*_js WEBPACK_ARGS=--watch

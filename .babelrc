@@ -5,8 +5,8 @@
     ],
 
     plugins: [
-        "./web/node_modules/babel-plugin-transform-class-properties",
         "./web/node_modules/babel-plugin-transform-decorators-legacy",
+        "./web/node_modules/babel-plugin-transform-class-properties",
         "./web/node_modules/babel-plugin-transform-object-rest-spread"
     ],
 }

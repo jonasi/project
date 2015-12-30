@@ -17,7 +17,7 @@ func NewServer(l log15.Logger) *Server {
 	t := template.Must(template.ParseGlob("server/templates/*"))
 
 	s.Use(
-		&middleware.ContentLengthHandler{},
+		// &middleware.ContentLengthHandler{},
 		smiddleware.LogRequest(l),
 		middleware.Template(t),
 	)
