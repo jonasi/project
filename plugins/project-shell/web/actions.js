@@ -1,30 +1,72 @@
-export const COMMAND_REQUEST = 'command_request';
-export const COMMAND_RECEIVE = 'command_receive';
+export const POST_COMMAND_REQ = 'post_command_req';
+export const POST_COMMAND_RESP = 'post_command_resp';
 
-export const COMMANDS_REQUEST = 'commands_request';
-export const COMMANDS_RECEIVE = 'commands_receive';
+export const GET_COMMANDS_REQ = 'get_commands_req';
+export const GET_COMMANDS_RESP = 'get_commands_resp';
 
-export function getHistory({ api }) {
-    return dispatch => {
-        dispatch({ type: COMMANDS_REQUEST });
+export const GET_COMMAND_REQ = 'get_command_req';
+export const GET_COMMAND_RESP = 'get_command_resp';
 
-        api.get(`/plugins/shell/api/commands`)
-            .then(commands => dispatch({ type: COMMANDS_RECEIVE, commands }));
-    };
-}
+export const GET_STDOUT_REQ = 'get_stdout_req';
+export const GET_STDOUT_RESP = 'get_stdout_resp';
 
-export function runCommand({ api, args }) {
-    const cid = randomId();
-    args = ['sh', '-c', args];
+export const GET_STDERR_REQ = 'get_stderr_req';
+export const GET_STDERR_RESP = 'get_stderr_resp';
 
-    return dispatch => {
-        dispatch({ type: COMMAND_REQUEST, args, cid });
+export class Actions {
+    constructor(api) {
+        this.api = api;
+    }
 
-        api.post(`/plugins/shell/api/commands`, {
-            body: JSON.stringify({ args }),
-        })
-        .then(cmd => dispatch({ type: COMMAND_RECEIVE, cid, cmd }));
-    };
+    getHistory() {
+        return dispatch => {
+            dispatch({ type: GET_COMMANDS_REQ });
+
+            this.api.get(`/plugins/shell/api/commands`)
+                .then(commands => dispatch({ type: GET_COMMANDS_RESP, commands }));
+        };
+    }
+
+    getCommand(id) {
+        return dispatch => {
+            dispatch({ type: GET_COMMAND_REQ });
+
+            this.api.get(`/plugins/shell/api/commands/${ id }`)
+                .then(command => dispatch({ type: GET_COMMAND_RESP, id, command }));
+        };
+    }
+
+    runCommand({ args }) {
+        const cid = randomId();
+        args = ['sh', '-c', args];
+
+        return dispatch => {
+            dispatch({ type: POST_COMMAND_REQ, args, cid });
+
+            this.api.post(`/plugins/shell/api/commands`, {
+                body: JSON.stringify({ args }),
+            })
+            .then(cmd => dispatch({ type: POST_COMMAND_RESP, cid, cmd }));
+        };
+    }
+
+    getStdout({ id }) {
+        return dispatch => {
+            dispatch({ type: GET_STDOUT_REQ });
+
+            this.api.get(`/plugins/shell/api/commands/${ id }/stdout`)
+                .then(stdout => dispatch({ type: GET_STDOUT_RESP, id, stdout }));
+        };
+    }
+
+    getStderr({ id }) {
+        return dispatch => {
+            dispatch({ type: GET_STDERR_REQ });
+
+            this.api.get(`/plugins/shell/api/commands/${ id }/stderr`)
+                .then(stderr => dispatch({ type: GET_STDERR_RESP, id, stderr }));
+        };
+    }
 }
 
 function randomId() {

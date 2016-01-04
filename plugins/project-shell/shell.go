@@ -96,18 +96,7 @@ func (c *Commander) add(r *Run) {
 	defer c.mu.Unlock()
 
 	c.mp[r.ID.String()] = r
-	c.sl = append(c.sl, r)
-
-	// prune history to last 1000
-	diff := len(c.sl) - 1000
-
-	if diff > 0 {
-		for i := 0; i < diff; i++ {
-			delete(c.mp, c.sl[i].ID.String())
-		}
-
-		c.sl = c.sl[diff:]
-	}
+	c.sl = append([]*Run{r}, c.sl...)
 }
 
 func newRun(dir string, args ...string) *Run {
@@ -206,4 +195,4 @@ type sortedRuns []*Run
 
 func (s sortedRuns) Len() int           { return len(s) }
 func (s sortedRuns) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
-func (s sortedRuns) Less(i, j int) bool { return s[i].StartedAt.Before(s[j].StartedAt) }
+func (s sortedRuns) Less(i, j int) bool { return s[j].StartedAt.Before(s[i].StartedAt) }

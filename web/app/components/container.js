@@ -1,41 +1,46 @@
 import styles from './container.css';
 import React, { Component, PropTypes } from 'react';
-import { hoc as api } from 'web/common/api';
+import classnames from 'classnames';
 
-import Link from 'web/common/components/link';
+import Sidebar from './sidebar';
 
-const { node, object } = PropTypes;
+const { node } = PropTypes;
+const ls = window.localStorage || {};
+const lsKey = '__sidebar__closed__';
 
-@api({
-    plugins: {
-        initialValue: [],
-        path: () => '/api/plugins',
-    },
-})
 export default class extends Component {
     static propTypes = {
         children: node,
-        plugins: object,
+    }
+
+    constructor(props, context) {
+        super(props, context);
+
+        this.state = {
+            sidebarClosed: !!ls[lsKey],
+        };
+    }
+
+    toggleSidebar() {
+        this.setState({
+            sidebarClosed: !this.state.sidebarClosed,
+        });
     }
 
     render() {
-        const { plugins } = this.props;
+        const { sidebarClosed } = this.state;
+        ls[lsKey] = sidebarClosed ? "1" : "";
 
         return (
             <div className={ styles.container }>
-                <header className={ styles.header }>
-                    <h4><Link to="/">Projay</Link></h4>
-                </header>
+                <Sidebar className={ classnames({
+                    [styles.sidebar]: true,
+                    [styles.hidden]: sidebarClosed,
+                }) } />
                 <div className={ styles.body }>
-                    <div className={ styles.sidebar }>
-                        <ul>{
-                            plugins.value.map(({ name }) => (
-                                <li key={ name }>
-                                    <Link activeClassName="active" to={ `/web/global/plugins/${ name }` } >{ name }</Link>
-                                </li>
-                            ))
-                        }</ul>
-                    </div>
+                    <header className={ styles.header }>
+                        <button onClick={ () => this.toggleSidebar() }>{ sidebarClosed ? '>' : '<' }</button>
+                    </header>
                     <div className={ styles.content }>{
                         this.props.children
                     }</div>

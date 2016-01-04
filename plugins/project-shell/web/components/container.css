@@ -1,0 +1,15 @@
+.container {
+    form {
+        display: flex;
+        padding: 0 1em;
+
+        > input[type=text] {
+            flex: 1 1;
+        }
+
+        > input[type=submit] {
+            flex: 0 0 auto;
+            margin: 0 1em;
+        }
+    }
+}

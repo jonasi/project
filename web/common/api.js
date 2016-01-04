@@ -30,12 +30,19 @@ export default class API {
     }
 
     call(path, options = {}) {
-        return fetch(path, options).then(d => d.json()).then(d => {
-            if (d.error) {
-                throw new Error(d.error);
-            }
+        return fetch(path, options)
+            .then(resp => {
+                if (resp.headers.get('content-type') !== 'application/json') {
+                    return resp.text();
+                }
 
-            return d.data;
+                return resp.json().then(d => {
+                    if (d.error) {
+                        throw new Error(d.error);
+                    }
+
+                    return d.data;
+                });
         });
     }
 }

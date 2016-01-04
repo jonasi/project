@@ -34,7 +34,7 @@ export default class extends Component {
 
         if (this._src !== src) {
             this._src = src;
-            comm.dispatchHistoryMsg(this.refs.child, '_replaceState', [null, src]);
+            comm.dispatchHistoryMsg(this.refs.child, '_replace', src);
         }
     }
 

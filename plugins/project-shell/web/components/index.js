@@ -2,7 +2,9 @@ import { shell } from './index.css';
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { runCommand, getHistory } from '../actions';
+import moment from 'moment';
+
+import Link from 'web/common/components/link';
 
 @connect(state => ({
     pending: state.get('pending'),
@@ -16,26 +18,14 @@ export default class Shell extends Component {
     }
 
     static contextTypes = {
-        api: React.PropTypes.object,
+        actions: React.PropTypes.object,
     }
 
     componentWillMount() {
         const { dispatch } = this.props;
-        const { api } = this.context;
+        const { actions } = this.context;
 
-        dispatch(getHistory({ api }));
-    }
-
-    onSubmit(e) {
-        e.preventDefault();
-
-        const { dispatch } = this.props;
-        const { api } = this.context;
-
-        dispatch(runCommand({ 
-            api,
-            args: this.refs.text.value,
-        }));
+        dispatch(actions.getHistory());
     }
 
     render() {
@@ -43,13 +33,17 @@ export default class Shell extends Component {
 
         return (
             <div className={ shell }>
-                <form onSubmit={ e => this.onSubmit(e) }>
-                    <input type="text" ref="text" />
-                    <input className="button-primary" type="submit" value="submit" />
-                </form>
-                <ul>{
-                    commands.map(cmd => <li>{ cmd.cmd } { cmd.args.join(' ') }</li>)
-                }</ul>
+                <table className="u-fill-width">
+                    <tbody>{
+                        commands.map(cmd => (
+                            <tr key={ cmd.id }>
+                                <td><Link to={ `/plugins/shell/web/commands/${ cmd.id }` }>{ moment(cmd.started_at).fromNow() }</Link></td>
+                                <td><Link to={ `/plugins/shell/web/commands/${ cmd.id }` }>{ cmd.cmd } { cmd.args.join(' ') }</Link></td>
+                                <td>{ cmd.state === 'inprogress' ? 'in progress' : 'exit code: ' + cmd.exit_code }</td>
+                            </tr>
+                        )).toList()
+                    }</tbody>
+                </table>
             </div>
         );
     }

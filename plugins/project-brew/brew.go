@@ -13,7 +13,7 @@ import (
 func LocalVersion() (*Version, error) {
 	var (
 		v   Version
-		fmt = "%s (git revision %s last commit"
+		fmt = "Homebrew %s (git revision %s last commit"
 	)
 
 	err := exec.Command("brew", "--version").RunScanf(fmt, &v.Version, &v.Revision)
