@@ -1,20 +1,23 @@
 import { brew } from './index.css';
 import React, { Component, PropTypes } from 'react';
 
-import { hoc as api } from 'web/common/api';
+import connect from 'web/common/connect';
 import Tabs, { Tab } from 'web/common/components/tabs';
 import Link from 'web/common/components/link';
 
 import brewImgURL from '../img/brew.png';
 
-const { object } = PropTypes;
+const { object, func } = PropTypes;
 
-@api({
-    version: { path: '/plugins/brew/api/version', initialValue: {} },
-})
+@connect(state => ({ version: state.get('version') }), ['getVersion'])
 export default class extends Component {
     static propTypes = {
+        getVersion: func.isRequired,
         version: object.isRequired,
+    }
+
+    componentWillMount() {
+        this.props.getVersion();
     }
 
     render() {
@@ -25,7 +28,7 @@ export default class extends Component {
                 <a href="http://brew.sh/" target="__blank">
                     <img src={ brewImgURL } />
                 </a>
-                { version.value.version } { version.value.revision }
+                { version.version } { version.revision }
                 <Tabs>
                     <Tab id="installed" label="Installed" renderFn={ () => <Installed /> } />
                     <Tab id="all" label="All" renderFn={ () => <All /> } />
@@ -35,37 +38,38 @@ export default class extends Component {
     }
 }
 
-@api({
-    formulae: {
-        initialValue: [],
-        path: '/plugins/brew/api/formulae?filter=installed',
-    },
-})
+
+@connect(state => ({ installed: state.get('installed') }), ['getInstalled'])
 class Installed extends Component {
     static propTypes = {
-        formulae: object.isRequired,
+        installed: object.isRequired,
+        getInstalled: func.isRequired,
+    }
+
+    componentWillMount() {
+        this.props.getInstalled();
     }
 
     render() {
-        const { formulae } = this.props;
-        return <FormulaTable formulae={ formulae } />;
+        const { installed } = this.props;
+        return <FormulaTable formulae={ installed } />;
     }
 }
 
-@api({
-    formulae: {
-        initialValue: [],
-        path: '/plugins/brew/api/formulae?filter=all',
-    },
-})
+@connect(state => ({ all: state.get('all') }), ['getAll'])
 class All extends Component {
     static propTypes = {
-        formulae: object.isRequired,
+        all: object.isRequired,
+        getAll: func.isRequired,
+    }
+
+    componentWillMount() {
+        this.props.getAll();
     }
 
     render() {
-        const { formulae } = this.props;
-        return <FormulaTable formulae={ formulae } />;
+        const { all } = this.props;
+        return <FormulaTable formulae={ all } />;
     }
 }
 
@@ -89,7 +93,7 @@ class FormulaTable extends Component {
                     </tr>
                 </thead>
                 <tbody>{
-                    formulae.value.map(f => {
+                    formulae.map(f => {
                         const version = f.installed && f.installed.length ? 
                             f.installed.map(v => v.version).join(', ') : '';
 

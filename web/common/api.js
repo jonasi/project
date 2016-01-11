@@ -1,11 +1,5 @@
 import 'whatwg-fetch';
 
-import React, { Component, PropTypes } from 'react';
-import { Map } from 'immutable';
-import ValueState from './value_state';
-
-const { object } = PropTypes;
-
 const { fetch } = window;
 
 export default class API {
@@ -67,97 +61,4 @@ export function loadPlugin(name) {
         script.src = `/plugins/${ name }/assets/plugin.js`;
         head.appendChild(script);
     });
-}
-
-export function hoc(vals) {
-    return c => comp(c, vals);
-}
-
-function comp(Comp, vals) {
-    let results = Map();
-
-    for (const k in vals) {
-        if (typeof vals[k] === 'function' || typeof vals[k] === 'string') {
-            vals[k] = { path: vals[k], initialValue: void 0 };
-        }
-
-        if (typeof vals[k].path === 'string') {
-            const path = vals[k].path;
-            vals[k].path = () => path;
-        }
-
-        results = results.set(k, new ValueState({
-            value: vals[k].initialValue,
-        }));
-    }
-
-    return class extends Component {
-        static Comp = Comp
-        static displayName = 'APIComponent(' + (Comp.name || Comp.displayName) + ')'
-
-        static contextTypes = {
-            api: object.isRequired,
-        }
-
-        constructor(props, context) {
-            super(props, context);
-
-            this.state = { results };
-        }
-
-        componentWillMount() {
-            const { api } = this.context;
-            let { results } = this.state;
-
-            for (const k in vals) {
-                const path = vals[k].path(this.props);
-                results = results.set(k, results.get(k).setLoading());
-
-                api.call(path, {
-                    method: 'get',
-                })
-                    .then(val => this._mergeResults(k, val))
-                    .catch(error => this._mergeResults(k, void 0, error));
-            }
-
-            this.setState({ results });
-        }
-
-        _mergeResults(k, value, error) {
-            const { results } = this.state;
-            let v;
-
-            if (arguments.length === 2) {
-                v = results.get(k).setValue(value);
-            } else {
-                v = results.get(k).setError(error);
-            }
-
-            this.setState({ 
-                results: results.set(k, v),
-            });
-        }
-
-        render() {
-            const props = merge({}, this.props, this.state.results);
-
-            return <Comp { ...props } />;
-        }
-    };
-}
-
-function merge(first, ...rest) {
-    if (first instanceof Map) {
-        first = first.toObject();
-    }
-
-    for (const k in rest) {
-        if (rest[k] instanceof Map) {
-            rest[k].forEach((v, k) => first[k] = v);
-        } else {
-            Object.assign(first, rest[k]);
-        }
-    }
-
-    return first;
 }

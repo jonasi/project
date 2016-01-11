@@ -7,8 +7,8 @@ import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 
 const store = applyMiddleware(thunk)(createStore)(reducer);
-const actions = new Actions();
 
 const app = new App();
-actions.api = app.api;
+const actions = new Actions(app.api);
+
 app.render({ routes, context: { store, actions } });

@@ -1,25 +1,21 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import connect from 'web/common/connect';
 import Tabs, { Tab } from 'web/common/components/tabs';
 
 @connect((state, props) => ({
     command: state.getIn(['commands', props.params.id]),
-}))
+}), ['getCommand'])
 export default class Command extends Component {
     static propTypes = {
+        getCommand: React.PropTypes.func.isRequired,
         params: React.PropTypes.object.isRequired,
         command: React.PropTypes.object,
     }
 
-    static contextTypes = {
-        actions: React.PropTypes.object,
-    }
-
     componentWillMount() {
-        const { dispatch, params } = this.props;
-        const { actions } = this.context;
+        const { getCommand, params } = this.props;
 
-        dispatch(actions.getCommand(params.id));
+        getCommand(params.id);
     }
 
     render() {
@@ -43,23 +39,18 @@ export default class Command extends Component {
 
 @connect((state, props) => ({
     stdout: state.getIn(['stdout', props.id]),
-}))
+}), ['getStdout'])
 class Stdout extends Component {
     static propTypes = {
-        dispatch: React.PropTypes.func,
+        getStdout: React.PropTypes.func,
         id: React.PropTypes.string,
         stdout: React.PropTypes.string,
     }
 
-    static contextTypes = {
-        actions: React.PropTypes.object,
-    }
-
     componentWillMount() {
-        const { dispatch, id } = this.props;
-        const { actions } = this.context;
+        const { getStdout, id } = this.props;
 
-        dispatch(actions.getStdout({ id }));
+        getStdout({ id });
     }
 
     render() {
@@ -70,23 +61,17 @@ class Stdout extends Component {
 
 @connect((state, props) => ({
     stderr: state.getIn(['stderr', props.id]),
-}))
+}), ['getStderr'])
 class Stderr extends Component {
     static propTypes = {
-        dispatch: React.PropTypes.func,
+        getStderr: React.PropTypes.func,
         id: React.PropTypes.string,
         stderr: React.PropTypes.string,
     }
 
-    static contextTypes = {
-        actions: React.PropTypes.object,
-    }
-
     componentWillMount() {
-        const { dispatch, id } = this.props;
-        const { actions } = this.context;
-
-        dispatch(actions.getStderr({ id }));
+        const { getStderr, id } = this.props;
+        getStderr({ id });
     }
 
     render() {

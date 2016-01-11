@@ -1,23 +1,23 @@
 import styles from './sidebar.css';
 
 import React, { Component, PropTypes } from 'react';
-import { hoc as api } from 'web/common/api';
+import connect from 'web/common/connect';
 import classnames from 'classnames';
 
 import Link from 'web/common/components/link';
 
-const { object, string } = PropTypes;
+const { object, func, string } = PropTypes;
 
-@api({
-    plugins: {
-        initialValue: [],
-        path: () => '/api/plugins',
-    },
-})
+@connect(state => ({ plugins: state.get('plugins') }), ['getPlugins'])
 export default class Sidebar extends Component {
     static propTypes = {
         plugins: object,
         className: string,
+        getPlugins: func,
+    }
+
+    componentWillMount() {
+        this.props.getPlugins();
     }
 
     render() {
@@ -26,7 +26,7 @@ export default class Sidebar extends Component {
         return (
             <div className={ classnames(styles.sidebar, className) }>
                 <ul>{
-                    plugins.value.map(({ name }) => (
+                    plugins.map(({ name }) => (
                         <li key={ name }>
                             <Link activeClassName="active" to={ `/web/global/plugins/${ name }` } >{ name }</Link>
                         </li>

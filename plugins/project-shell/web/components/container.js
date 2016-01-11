@@ -1,19 +1,18 @@
 import { container } from './container.css';
 import React, { Component, PropTypes } from 'react';
-import { connect } from 'react-redux';
+import connect from 'web/common/connect';
 
 const { func, node, object } = PropTypes;
 
-@connect(state => ({ latest: state.get('commands').first() }))
+@connect(state => ({ latest: state.get('commands').first() }), ['runCommand'])
 export default class ShellContainer extends Component {
     static propTypes = {
-        dispatch: func.isRequired,
+        runCommand: func.isRequired,
         children: node,
         latest: object,
     }
 
     static contextTypes = {
-        actions: object.isRequired,
         history: object.isRequired,
     }
 
@@ -29,12 +28,11 @@ export default class ShellContainer extends Component {
     onSubmit(e) {
         e.preventDefault();
 
-        const { dispatch } = this.props;
-        const { actions } = this.context;
+        const { runCommand } = this.props;
 
-        dispatch(actions.runCommand({
+        runCommand({
             args: this.refs.text.value,
-        }));
+        });
     }
 
     render() {

@@ -1,7 +1,7 @@
 import { shell } from './index.css';
 
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import connect from 'web/common/connect';
 import moment from 'moment';
 
 import Link from 'web/common/components/link';
@@ -9,23 +9,16 @@ import Link from 'web/common/components/link';
 @connect(state => ({
     pending: state.get('pending'),
     commands: state.get('commands'),
-}))
+}), ['getHistory'])
 export default class Shell extends Component {
     static propTypes = {
-        dispatch: React.PropTypes.func,
+        getHistory: React.PropTypes.func,
         pending: React.PropTypes.object,
         commands: React.PropTypes.object,
     }
 
-    static contextTypes = {
-        actions: React.PropTypes.object,
-    }
-
     componentWillMount() {
-        const { dispatch } = this.props;
-        const { actions } = this.context;
-
-        dispatch(actions.getHistory());
+        this.props.getHistory();
     }
 
     render() {

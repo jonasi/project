@@ -1,21 +1,29 @@
 import React, { Component, PropTypes } from 'react';
 
-import { hoc as api } from 'web/common/api';
+import connect from 'web/common/connect';
 
-const { object } = PropTypes;
+const { object, func } = PropTypes;
 
-@api({
-    formula: {
-        initialValue: {},
-        path: props => `/plugins/brew/api/formulae/${ props.params.formula }`,
-    },
-})
+@connect(
+    (state, props) => ({ formula: state.getIn(['formula', props.params.formula]) }),
+    ['getFormula']
+)
 export default class extends Component {
     static propTypes = {
-        formula: object.isRequired,
+        formula: object,
+        params: object.isRequired,
+        getFormula: func.isRequired,
+    }
+
+    componentWillMount() {
+        const { params, getFormula } = this.props;
+        getFormula(params.formula);
     }
 
     render() {
-        return <pre><code>{ JSON.stringify(this.props.formula.toJS(), null, "  ") }</code></pre>;
+        let { formula = {} } = this.props;
+        formula = formula.toJS ? formula.toJS() : formula;
+
+        return <pre><code>{ JSON.stringify(formula, null, "  ") }</code></pre>;
     }
 }
