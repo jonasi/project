@@ -6,11 +6,11 @@ export class Actions {
         this.api = api;
     }
 
-    getPlugins() {
+    loadPlugins() {
         return dispatch => {
             dispatch({ type: GET_PLUGINS_REQ });
 
-            this.api.get(`/api/plugins`)
+            return this.api.get(`/api/plugins`)
                 .then(plugins => dispatch({ type: GET_PLUGINS_RESP, plugins }));
         };
     }

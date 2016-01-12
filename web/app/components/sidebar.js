@@ -8,16 +8,16 @@ import Link from 'web/common/components/link';
 
 const { object, func, string } = PropTypes;
 
-@connect(state => ({ plugins: state.get('plugins') }), ['getPlugins'])
+@connect(state => ({ plugins: state.get('plugins') }), ['loadPlugins'])
 export default class Sidebar extends Component {
     static propTypes = {
         plugins: object,
         className: string,
-        getPlugins: func,
+        loadPlugins: func,
     }
 
     componentWillMount() {
-        this.props.getPlugins();
+        this.props.loadPlugins();
     }
 
     render() {
