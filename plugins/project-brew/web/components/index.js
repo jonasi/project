@@ -14,7 +14,7 @@ export default class extends Component {
     static propTypes = {
         getVersion: func.isRequired,
         version: object.isRequired,
-    }
+    };
 
     componentWillMount() {
         this.props.getVersion();
@@ -44,7 +44,7 @@ class Installed extends Component {
     static propTypes = {
         installed: object.isRequired,
         getInstalled: func.isRequired,
-    }
+    };
 
     componentWillMount() {
         this.props.getInstalled();
@@ -61,7 +61,7 @@ class All extends Component {
     static propTypes = {
         all: object.isRequired,
         getAll: func.isRequired,
-    }
+    };
 
     componentWillMount() {
         this.props.getAll();
@@ -76,7 +76,7 @@ class All extends Component {
 class FormulaTable extends Component {
     static propTypes = {
         formulae: object.isRequired,
-    }
+    };
 
     render() {
         const { formulae } = this.props;

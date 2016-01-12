@@ -13,13 +13,13 @@ export default function(props) {
     }
 
     return class ContextProvider extends Component {
-        static displayName = 'ContextProvider(' + Object.keys(props).join(', ') + ')'
+        static displayName = 'ContextProvider(' + Object.keys(props).join(', ') + ')';
 
-        static childContextTypes = types
+        static childContextTypes = types;
 
         static propTypes = {
             children: node,
-        }
+        };
 
         getChildContext() {
             return ctxt;

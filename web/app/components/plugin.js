@@ -7,11 +7,11 @@ export default class extends Component {
     static propTypes = {
         params: object.isRequired,
         location: object.isRequired,
-    }
+    };
 
     static contextTypes = {
         comm: object.isRequired,
-    }
+    };
 
     constructor(props, context) {
         super(props, context);

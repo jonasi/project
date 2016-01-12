@@ -11,7 +11,7 @@ const lsKey = '__sidebar__closed__';
 export default class extends Component {
     static propTypes = {
         children: node,
-    }
+    };
 
     constructor(props, context) {
         super(props, context);

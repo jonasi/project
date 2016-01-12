@@ -12,7 +12,7 @@ export class Tab extends Component {
         id: string.isRequired,
         label: node,
         renderFn: func.isRequired,
-    }
+    };
 
     render() {
         return this.props.renderFn();
@@ -23,12 +23,12 @@ export default class extends Component {
     static contextTypes = {
         location: object.isRequired,
         history: object.isRequired,
-    }
+    };
 
     static propTypes = {
         children: node.isRequired,
         defaultTab: string,
-    }
+    };
 
     render() {
         const { children, defaultTab } = this.props;

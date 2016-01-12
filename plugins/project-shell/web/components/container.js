@@ -10,11 +10,11 @@ export default class ShellContainer extends Component {
         runCommand: func.isRequired,
         children: node,
         latest: object,
-    }
+    };
 
     static contextTypes = {
         history: object.isRequired,
-    }
+    };
 
     componentWillReceiveProps(props) {
         const { history } = this.context;

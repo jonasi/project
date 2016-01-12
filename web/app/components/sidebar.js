@@ -14,7 +14,7 @@ export default class Sidebar extends Component {
         plugins: object,
         className: string,
         loadPlugins: func,
-    }
+    };
 
     componentWillMount() {
         this.props.loadPlugins();

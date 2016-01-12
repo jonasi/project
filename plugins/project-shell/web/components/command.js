@@ -10,7 +10,7 @@ export default class Command extends Component {
         getCommand: React.PropTypes.func.isRequired,
         params: React.PropTypes.object.isRequired,
         command: React.PropTypes.object,
-    }
+    };
 
     componentWillMount() {
         const { getCommand, params } = this.props;
@@ -45,7 +45,7 @@ class Stdout extends Component {
         getStdout: React.PropTypes.func,
         id: React.PropTypes.string,
         stdout: React.PropTypes.string,
-    }
+    };
 
     componentWillMount() {
         const { getStdout, id } = this.props;
@@ -67,7 +67,7 @@ class Stderr extends Component {
         getStderr: React.PropTypes.func,
         id: React.PropTypes.string,
         stderr: React.PropTypes.string,
-    }
+    };
 
     componentWillMount() {
         const { getStderr, id } = this.props;

@@ -15,7 +15,7 @@ export default class Shell extends Component {
         getHistory: React.PropTypes.func,
         pending: React.PropTypes.object,
         commands: React.PropTypes.object,
-    }
+    };
 
     componentWillMount() {
         this.props.getHistory();

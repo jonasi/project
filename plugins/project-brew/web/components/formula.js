@@ -13,7 +13,7 @@ export default class extends Component {
         formula: object,
         params: object.isRequired,
         getFormula: func.isRequired,
-    }
+    };
 
     componentWillMount() {
         const { params, getFormula } = this.props;
