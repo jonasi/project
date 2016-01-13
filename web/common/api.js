@@ -3,6 +3,10 @@ import 'whatwg-fetch';
 const { fetch } = window;
 
 export default class API {
+    constructor(prefix = '') {
+        this.prefix = prefix;
+    }
+
     get(path, options = {}) {
         options.method = 'GET';
         return this.call(path, options);
@@ -24,6 +28,8 @@ export default class API {
     }
 
     call(path, options = {}) {
+        path = this.prefix + path;
+
         return fetch(path, options)
             .then(resp => {
                 if (resp.headers.get('content-type') !== 'application/json') {

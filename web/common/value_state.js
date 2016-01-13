@@ -12,8 +12,8 @@ function mutate(vs, state, value, error) {
     });
 }
 
-export default class extends base {
-    constructor({ state, value, error }) {
+export default class ValueState extends base {
+    constructor({ state, value, error } = {}) {
         if (state === void 0) {
             if (value !== void 0) {
                 state = 'success';
@@ -41,5 +41,25 @@ export default class extends base {
 
     setError(error) {
         return mutate(this, 'error', void 0, error);
+    }
+
+    isEmpty() {
+        return this.state === 'empty';
+    }
+
+    isLoading() {
+        return this.state === 'loading';
+    }
+
+    isSuccess() {
+        return this.state === 'success';
+    }
+
+    isError() {
+        return this.state === 'error';
+    }
+
+    isLoaded() {
+        return this.isSuccess() || this.isError();
     }
 }

@@ -40,22 +40,26 @@ export default class Comm {
     }
 }
 
+const proxyMethods = ['push', 'pushState', 'replace', 'replaceState', 'go', 'goBack', 'goForward'];
+
+function proxyTransition(old, name, comm) {
+    return function(...args) {
+        if (!comm._parent) {
+            old[name](...args);
+            return;
+        }
+
+        comm.dispatchHistoryMsg(comm._parent, name, ...args);
+    };
+}
+
 export function createHistory(comm) {
     const o = oldHistory();
     const n = Object.assign({}, o);
 
-    const proxy = prop => (...args) => {
-        if (!comm._parent) {
-            o[prop](...args);
-            return;
-        }
-
-        comm.dispatchHistoryMsg(comm._parent, prop, ...args);
-    };
-
-    for (const k of ['push', 'pushState', 'replace', 'replaceState', 'go', 'goBack', 'goForward']) {
+    for (const k of proxyMethods) {
         n['_' + k] = o[k];
-        n[k] = proxy(k);
+        n[k] = proxyTransition(o, k, comm);
     }
 
     return n;

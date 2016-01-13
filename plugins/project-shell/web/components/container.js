@@ -1,10 +1,13 @@
 import { container } from './container.css';
 import React, { Component, PropTypes } from 'react';
-import connect from 'web/common/connect';
+import { connect } from 'web/common/redux';
 
 const { func, node, object } = PropTypes;
 
-@connect(state => ({ latest: state.get('commands').first() }), ['runCommand'])
+@connect({
+    state: state => ({ latest: state.get('commands').first() }),
+    actions: ['runCommand'],
+})
 export default class ShellContainer extends Component {
     static propTypes = {
         runCommand: func.isRequired,

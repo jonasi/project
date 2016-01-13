@@ -1,32 +1,34 @@
 import styles from './sidebar.css';
 
 import React, { Component, PropTypes } from 'react';
-import connect from 'web/common/connect';
+import { connect } from 'web/common/redux';
 import classnames from 'classnames';
 
 import Link from 'web/common/components/link';
 
-const { object, func, string } = PropTypes;
+const { object, string } = PropTypes;
 
-@connect(state => ({ plugins: state.get('plugins') }), ['loadPlugins'])
+@connect({
+    state: state => ({ plugins: state.get('plugins') }),
+    onMount: ['loadPlugins'],
+})
 export default class Sidebar extends Component {
     static propTypes = {
         plugins: object,
         className: string,
-        loadPlugins: func,
     };
-
-    componentWillMount() {
-        this.props.loadPlugins();
-    }
 
     render() {
         const { plugins, className} = this.props;
 
+        if (!plugins.isSuccess()) {
+            return null;
+        }
+
         return (
             <div className={ classnames(styles.sidebar, className) }>
                 <ul>{
-                    plugins.map(({ name }) => (
+                    plugins.value.map(({ name }) => (
                         <li key={ name }>
                             <Link activeClassName="active" to={ `/web/global/plugins/${ name }` } >{ name }</Link>
                         </li>

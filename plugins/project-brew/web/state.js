@@ -1,47 +1,47 @@
 import { Map, List } from 'immutable';
+import ValueState from 'web/common/value_state';
+import { handleAPIState } from 'web/common/redux';
 
 import {
-    GET_VERSION_REQ, GET_VERSION_RESP,
-    GET_INSTALLED_REQ, GET_INSTALLED_RESP,
-    GET_ALL_REQ, GET_ALL_RESP,
-    GET_FORMULA_REQ, GET_FORMULA_RESP,
+    GET_VERSION,
+    GET_INSTALLED,
+    GET_ALL,
+    GET_FORMULA,
 } from './actions';
 
 const defaultState = Map({
-    version: {},
-    installed: List(),
-    all: List(),
+    version: new ValueState(),
+    installed: new ValueState(),
+    all: new ValueState(),
     formula: Map(),
 });
 
-export default function(state, { type, ...args }) {
+export default function(state, { type, kind, body, ...args }) {
     if (!state) {
         state = defaultState;
     }
 
     switch (type) {
-        case GET_VERSION_REQ:
-            break;
-        case GET_VERSION_RESP:
-            state = state.set('version', args.version);
+        case GET_VERSION:
+            state = handleAPIState({ state, kind, path: 'version', success: () => body });
             break;
 
-        case GET_INSTALLED_REQ:
-            break;
-        case GET_INSTALLED_RESP:
-            state = state.set('installed', List(args.installed));
+        case GET_INSTALLED:
+            state = handleAPIState({ state, kind, path: 'installed', success: () => List(body) });
             break;
 
-        case GET_ALL_REQ:
-            break;
-        case GET_ALL_RESP:
-            state = state.set('all', List(args.all));
+        case GET_ALL:
+            state = handleAPIState({ state, kind, path: 'all', success: () => List(body) });
             break;
 
-        case GET_FORMULA_REQ:
-            break;
-        case GET_FORMULA_RESP:
-            state = state.setIn(['formula', args.formula.name], args.formula);
+        case GET_FORMULA:
+            const path = ['formula', args.formula];
+
+            if (!state.getIn(path)) {
+                state = state.setIn(['formula', args.formula], new ValueState());
+            }
+
+            state = handleAPIState({ state, kind, path: ['formula', args.formula], success: () => body });
             break;
     }
 

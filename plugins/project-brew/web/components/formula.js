@@ -1,28 +1,27 @@
 import React, { Component, PropTypes } from 'react';
 
-import connect from 'web/common/connect';
+import { connect } from 'web/common/redux';
 
-const { object, func } = PropTypes;
+const { object } = PropTypes;
 
-@connect(
-    (state, props) => ({ formula: state.getIn(['formula', props.params.formula]) }),
-    ['getFormula']
-)
+@connect({
+    state: (state, props) => ({ formula: state.getIn(['formula', props.params.formula]) }),
+    onMount: (actions, props) => actions.getFormula(props.params.formula),
+})
 export default class extends Component {
     static propTypes = {
         formula: object,
         params: object.isRequired,
-        getFormula: func.isRequired,
     };
 
-    componentWillMount() {
-        const { params, getFormula } = this.props;
-        getFormula(params.formula);
-    }
-
     render() {
-        let { formula = {} } = this.props;
-        formula = formula.toJS ? formula.toJS() : formula;
+        let { formula } = this.props;
+
+        if (!formula.isSuccess()) {
+            return null;
+        }
+
+        formula = formula.value.toJS ? formula.value.toJS() : formula.value;
 
         return <pre><code>{ JSON.stringify(formula, null, "  ") }</code></pre>;
     }

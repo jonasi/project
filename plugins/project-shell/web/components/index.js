@@ -1,25 +1,23 @@
 import { shell } from './index.css';
 
 import React, { Component } from 'react';
-import connect from 'web/common/connect';
+import { connect } from 'web/common/redux';
 import moment from 'moment';
 
 import Link from 'web/common/components/link';
 
-@connect(state => ({
-    pending: state.get('pending'),
-    commands: state.get('commands'),
-}), ['getHistory'])
+@connect({
+    state: state => ({
+        pending: state.get('pending'),
+        commands: state.get('commands'),
+    }),
+    onMount: ['getHistory'],
+})
 export default class Shell extends Component {
     static propTypes = {
-        getHistory: React.PropTypes.func,
         pending: React.PropTypes.object,
         commands: React.PropTypes.object,
     };
-
-    componentWillMount() {
-        this.props.getHistory();
-    }
 
     render() {
         const { commands } = this.props;

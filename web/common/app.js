@@ -13,12 +13,12 @@ import API from 'web/common/api';
 import ContextProvider from 'web/common/components/context_provider';
 
 export default class App {
-    constructor({ Actions, reducer, routes }) {
+    constructor({ actions, reducer, routes, apiPrefix = '', webPrefix = ''}) {
         this.root = document.getElementById('react-root');
         this.logger = new Logger();
-        this.api = new API();
-        this.comm = new Comm(this.logger);
-        this.actions = new Actions(this.api);
+        this.api = new API(apiPrefix);
+        this.comm = new Comm(this.logger, webPrefix);
+        this.actions = typeof actions === 'function' ? actions(this.api) : actions;
         this.store = applyMiddleware(thunk)(createStore)(reducer);
         this.routes = routes;
     }

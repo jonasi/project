@@ -1,22 +1,16 @@
 import React, { Component } from 'react';
-import connect from 'web/common/connect';
+import { connect } from 'web/common/redux';
 import Tabs, { Tab } from 'web/common/components/tabs';
 
-@connect((state, props) => ({
-    command: state.getIn(['commands', props.params.id]),
-}), ['getCommand'])
+@connect({
+    state: (state, props) => ({ command: state.getIn(['commands', props.params.id]) }),
+    onMount: (actions, props) => actions.getCommand(props.params.id),
+})
 export default class Command extends Component {
     static propTypes = {
-        getCommand: React.PropTypes.func.isRequired,
         params: React.PropTypes.object.isRequired,
         command: React.PropTypes.object,
     };
-
-    componentWillMount() {
-        const { getCommand, params } = this.props;
-
-        getCommand(params.id);
-    }
 
     render() {
         const { command } = this.props;
@@ -37,21 +31,15 @@ export default class Command extends Component {
     }
 }
 
-@connect((state, props) => ({
-    stdout: state.getIn(['stdout', props.id]),
-}), ['getStdout'])
+@connect({
+    state: (state, props) => ({ stdout: state.getIn(['stdout', props.id]) }),
+    onMount: (actions, props) => actions.getStdout(props.id),
+})
 class Stdout extends Component {
     static propTypes = {
-        getStdout: React.PropTypes.func,
         id: React.PropTypes.string,
         stdout: React.PropTypes.string,
     };
-
-    componentWillMount() {
-        const { getStdout, id } = this.props;
-
-        getStdout({ id });
-    }
 
     render() {
         const { stdout } = this.props;
@@ -59,20 +47,15 @@ class Stdout extends Component {
     }
 }
 
-@connect((state, props) => ({
-    stderr: state.getIn(['stderr', props.id]),
-}), ['getStderr'])
+@connect({
+    state: (state, props) => ({ stderr: state.getIn(['stderr', props.id]) }),
+    onMount: (actions, props) => actions.getStderr(props.id),
+})
 class Stderr extends Component {
     static propTypes = {
-        getStderr: React.PropTypes.func,
         id: React.PropTypes.string,
         stderr: React.PropTypes.string,
     };
-
-    componentWillMount() {
-        const { getStderr, id } = this.props;
-        getStderr({ id });
-    }
 
     render() {
         const { stderr } = this.props;

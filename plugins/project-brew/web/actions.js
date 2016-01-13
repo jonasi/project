@@ -1,53 +1,26 @@
-export const GET_VERSION_REQ = 'get_version_req';
-export const GET_VERSION_RESP = 'get_version_resp';
+import { createAPIAction } from 'web/common/redux';
 
-export const GET_INSTALLED_REQ = 'get_installed_req';
-export const GET_INSTALLED_RESP = 'get_installed_resp';
+export const GET_VERSION = 'get_version';
+export const GET_INSTALLED = 'get_installed';
+export const GET_ALL = 'get_all';
+export const GET_FORMULA = 'get_formula';
 
-export const GET_ALL_REQ = 'get_all_req';
-export const GET_ALL_RESP = 'get_all_resp';
+export default function actions(api) {
+    return {
+        getVersion() {
+            return createAPIAction({ api, type: GET_VERSION, path: `/version` });
+        },
 
-export const GET_FORMULA_REQ = 'get_formula_req';
-export const GET_FORMULA_RESP = 'get_formula_resp';
+        getInstalled() {
+            return createAPIAction({ api, type: GET_INSTALLED, path: `/formulae?filter=installed` });
+        },
 
-export class Actions {
-    constructor(api) {
-        this.api = api;
-    }
+        getAll() {
+            return createAPIAction({ api, type: GET_ALL, path: `/formulae?filter=all` });
+        },
 
-    getVersion() {
-        return dispatch => {
-            dispatch({ type: GET_VERSION_REQ });
-
-            this.api.get(`/plugins/brew/api/version`)
-                .then(version => dispatch({ type: GET_VERSION_RESP, version }));
-        };
-    }
-
-    getInstalled() {
-        return dispatch => {
-            dispatch({ type: GET_INSTALLED_REQ });
-
-            this.api.get(`/plugins/brew/api/formulae?filter=installed`)
-                .then(installed => dispatch({ type: GET_INSTALLED_RESP, installed }));
-        };
-    }
-
-    getAll() {
-        return dispatch => {
-            dispatch({ type: GET_ALL_REQ });
-
-            this.api.get(`/plugins/brew/api/formulae?filter=all`)
-                .then(all => dispatch({ type: GET_ALL_RESP, all }));
-        };
-    }
-
-    getFormula(formula) {
-        return dispatch => {
-            dispatch({ type: GET_FORMULA_REQ });
-
-            this.api.get(`/plugins/brew/api/formulae/${ formula }`)
-                .then(formula => dispatch({ type: GET_FORMULA_RESP, formula }));
-        };
-    }
+        getFormula(formula) {
+            return createAPIAction({ api, type: GET_FORMULA, path: `/formulae/${ formula }`, formula });
+        },
+    };
 }

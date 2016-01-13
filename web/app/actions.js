@@ -1,17 +1,11 @@
-export const GET_PLUGINS_REQ = 'get_plugins_req';
-export const GET_PLUGINS_RESP = 'get_plugins_resp';
+import { createAPIAction } from 'web/common/redux';
 
-export class Actions {
-    constructor(api) {
-        this.api = api;
-    }
+export const GET_PLUGINS = 'get_plugins';
 
-    loadPlugins() {
-        return dispatch => {
-            dispatch({ type: GET_PLUGINS_REQ });
-
-            return this.api.get(`/api/plugins`)
-                .then(plugins => dispatch({ type: GET_PLUGINS_RESP, plugins }));
-        };
-    }
+export default function actions(api) {
+    return {
+        loadPlugins() {
+            return createAPIAction({ api, type: GET_PLUGINS, path: `/plugins` });
+        },
+    };
 }

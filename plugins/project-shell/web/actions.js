@@ -13,60 +13,58 @@ export const GET_STDOUT_RESP = 'get_stdout_resp';
 export const GET_STDERR_REQ = 'get_stderr_req';
 export const GET_STDERR_RESP = 'get_stderr_resp';
 
-export class Actions {
-    constructor(api) {
-        this.api = api;
-    }
+export default function actions(api) {
+    return {
+        getHistory() {
+            return dispatch => {
+                dispatch({ type: GET_COMMANDS_REQ });
 
-    getHistory() {
-        return dispatch => {
-            dispatch({ type: GET_COMMANDS_REQ });
+                api.get(`/commands`)
+                    .then(commands => dispatch({ type: GET_COMMANDS_RESP, commands }));
+            };
+        },
 
-            this.api.get(`/plugins/shell/api/commands`)
-                .then(commands => dispatch({ type: GET_COMMANDS_RESP, commands }));
-        };
-    }
+        getCommand(id) {
+            return dispatch => {
+                dispatch({ type: GET_COMMAND_REQ });
 
-    getCommand(id) {
-        return dispatch => {
-            dispatch({ type: GET_COMMAND_REQ });
+                api.get(`/commands/${ id }`)
+                    .then(command => dispatch({ type: GET_COMMAND_RESP, id, command }));
+            };
+        },
 
-            this.api.get(`/plugins/shell/api/commands/${ id }`)
-                .then(command => dispatch({ type: GET_COMMAND_RESP, id, command }));
-        };
-    }
+        runCommand({ args }) {
+            const cid = randomId();
+            args = ['sh', '-c', args];
 
-    runCommand({ args }) {
-        const cid = randomId();
-        args = ['sh', '-c', args];
+            const body = JSON.stringify({ args });
 
-        return dispatch => {
-            dispatch({ type: POST_COMMAND_REQ, args, cid });
+            return dispatch => {
+                dispatch({ type: POST_COMMAND_REQ, args, cid });
 
-            this.api.post(`/plugins/shell/api/commands`, {
-                body: JSON.stringify({ args }),
-            })
-            .then(cmd => dispatch({ type: POST_COMMAND_RESP, cid, cmd }));
-        };
-    }
+                api.post(`/commands`, { body })
+                    .then(cmd => dispatch({ type: POST_COMMAND_RESP, cid, cmd }));
+            };
+        },
 
-    getStdout({ id }) {
-        return dispatch => {
-            dispatch({ type: GET_STDOUT_REQ });
+        getStdout({ id }) {
+            return dispatch => {
+                dispatch({ type: GET_STDOUT_REQ });
 
-            this.api.get(`/plugins/shell/api/commands/${ id }/stdout`)
-                .then(stdout => dispatch({ type: GET_STDOUT_RESP, id, stdout }));
-        };
-    }
+                api.get(`/commands/${ id }/stdout`)
+                    .then(stdout => dispatch({ type: GET_STDOUT_RESP, id, stdout }));
+            };
+        },
 
-    getStderr({ id }) {
-        return dispatch => {
-            dispatch({ type: GET_STDERR_REQ });
+        getStderr({ id }) {
+            return dispatch => {
+                dispatch({ type: GET_STDERR_REQ });
 
-            this.api.get(`/plugins/shell/api/commands/${ id }/stderr`)
-                .then(stderr => dispatch({ type: GET_STDERR_RESP, id, stderr }));
-        };
-    }
+                api.get(`/commands/${ id }/stderr`)
+                    .then(stderr => dispatch({ type: GET_STDERR_RESP, id, stderr }));
+            };
+        },
+    };
 }
 
 function randomId() {
