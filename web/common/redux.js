@@ -1,5 +1,6 @@
 import { connect as oldConnect } from 'react-redux';
 import { bindActionCreators } from 'redux';
+import ValueState from './value_state';
 import { PropTypes } from 'react';
 import { pick } from 'lodash';
 
@@ -12,14 +13,20 @@ export function createAPIAction({ api, type, options, path, method = 'get', ...r
     };
 }
 
-export function handleAPIState({ state, kind, path, success }) {
-    const isStr = typeof path === 'string';
-
-    const v = isStr ? state.get(path) : state.getIn(path);
+export function handleAPIAction({ state, kind, path, success }) {
+    const v = get(state, path, new ValueState());
     const v2 = kind === 'request' ? v.setLoading() : v.setValue(success());
 
-    return isStr ? state.set(path, v2): state.setIn(path, v2);
+    return set(state, path, v2);
 }
+
+const get = (state, path, def) => (
+    state[typeof path === 'string' ? 'get' : 'getIn'](path, def)
+);
+
+const set = (state, path, val) => (
+    state[typeof path === 'string' ? 'set' : 'setIn'](path, val)
+);
 
 function onMountActions(onMount, actions, props) {
     if (typeof onMount === 'function') {

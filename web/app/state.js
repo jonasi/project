@@ -1,6 +1,6 @@
 import { Map, List } from 'immutable';
 import ValueState from 'web/common/value_state';
-import { handleAPIState } from 'web/common/redux';
+import { handleAPIAction } from 'web/common/redux';
 
 import {
     GET_PLUGINS,
@@ -17,7 +17,7 @@ export default function(state, { type, kind, body }) {
 
     switch (type) {
         case GET_PLUGINS:
-            state = handleAPIState({ state, kind, path: 'plugins', success: () => List(body) });
+            state = handleAPIAction({ state, kind, path: 'plugins', success: () => List(body) });
             break;
     }
 

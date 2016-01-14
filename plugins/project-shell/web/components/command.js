@@ -1,30 +1,32 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import { connect } from 'web/common/redux';
 import Tabs, { Tab } from 'web/common/components/tabs';
 
+const { object, string } = PropTypes;
+
 @connect({
-    state: (state, props) => ({ command: state.getIn(['commands', props.params.id]) }),
+    state: (state, props) => ({ command: state.getIn(['commands', 'value', props.params.id]) }),
     onMount: (actions, props) => actions.getCommand(props.params.id),
 })
 export default class Command extends Component {
     static propTypes = {
-        params: React.PropTypes.object.isRequired,
-        command: React.PropTypes.object,
+        params: object.isRequired,
+        command: object,
     };
 
     render() {
         const { command } = this.props;
 
-        if (!command) {
+        if (!command.isSuccess()) {
             return null;
         }
 
         return (
             <div>
-                <h5>{ command.id }</h5>
+                <h5>{ command.value.id }</h5>
                 <Tabs>
-                    <Tab id="stdout" label="Stdout" renderFn={ () => <Stdout id={ command.id } /> } />
-                    <Tab id="stderr" label="Stderr" renderFn={ () => <Stderr id={ command.id } /> } />
+                    <Tab id="stdout" label="Stdout" renderFn={ () => <Stdout id={ command.value.id } /> } />
+                    <Tab id="stderr" label="Stderr" renderFn={ () => <Stderr id={ command.value.id } /> } />
                 </Tabs>
             </div>
         );
@@ -37,13 +39,13 @@ export default class Command extends Component {
 })
 class Stdout extends Component {
     static propTypes = {
-        id: React.PropTypes.string,
-        stdout: React.PropTypes.string,
+        id: string.isRequired,
+        stdout: object,
     };
 
     render() {
         const { stdout } = this.props;
-        return <pre>{ stdout }</pre>;
+        return <pre>{ stdout.value }</pre>;
     }
 }
 
@@ -53,12 +55,12 @@ class Stdout extends Component {
 })
 class Stderr extends Component {
     static propTypes = {
-        id: React.PropTypes.string,
-        stderr: React.PropTypes.string,
+        id: string.isRequired,
+        stderr: object,
     };
 
     render() {
         const { stderr } = this.props;
-        return <pre>{ stderr }</pre>;
+        return <pre>{ stderr.value }</pre>;
     }
 }

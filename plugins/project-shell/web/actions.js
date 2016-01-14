@@ -1,68 +1,44 @@
-export const POST_COMMAND_REQ = 'post_command_req';
-export const POST_COMMAND_RESP = 'post_command_resp';
+import { createAPIAction } from 'web/common/redux';
 
-export const GET_COMMANDS_REQ = 'get_commands_req';
-export const GET_COMMANDS_RESP = 'get_commands_resp';
-
-export const GET_COMMAND_REQ = 'get_command_req';
-export const GET_COMMAND_RESP = 'get_command_resp';
-
-export const GET_STDOUT_REQ = 'get_stdout_req';
-export const GET_STDOUT_RESP = 'get_stdout_resp';
-
-export const GET_STDERR_REQ = 'get_stderr_req';
-export const GET_STDERR_RESP = 'get_stderr_resp';
+export const POST_COMMAND = 'post_command';
+export const GET_COMMANDS = 'get_commands';
+export const GET_COMMAND = 'get_command';
+export const GET_STDOUT = 'get_stdout';
+export const GET_STDERR = 'get_stderr';
 
 export default function actions(api) {
     return {
         getHistory() {
-            return dispatch => {
-                dispatch({ type: GET_COMMANDS_REQ });
-
-                api.get(`/commands`)
-                    .then(commands => dispatch({ type: GET_COMMANDS_RESP, commands }));
-            };
+            return createAPIAction({ api, type: GET_COMMANDS, path: `/commands` });
         },
 
         getCommand(id) {
-            return dispatch => {
-                dispatch({ type: GET_COMMAND_REQ });
-
-                api.get(`/commands/${ id }`)
-                    .then(command => dispatch({ type: GET_COMMAND_RESP, id, command }));
-            };
+            return createAPIAction({ api, type: GET_COMMAND, path: `/commands/${ id }`, id });
         },
 
-        runCommand({ args }) {
+        runCommand(args) {
             const cid = randomId();
             args = ['sh', '-c', args];
 
             const body = JSON.stringify({ args });
 
-            return dispatch => {
-                dispatch({ type: POST_COMMAND_REQ, args, cid });
-
-                api.post(`/commands`, { body })
-                    .then(cmd => dispatch({ type: POST_COMMAND_RESP, cid, cmd }));
-            };
+            return createAPIAction({
+                api, 
+                type: POST_COMMAND, 
+                method: 'post',
+                path: `/commands`,
+                options: { body },
+                args,
+                cid,
+            });
         },
 
-        getStdout({ id }) {
-            return dispatch => {
-                dispatch({ type: GET_STDOUT_REQ });
-
-                api.get(`/commands/${ id }/stdout`)
-                    .then(stdout => dispatch({ type: GET_STDOUT_RESP, id, stdout }));
-            };
+        getStdout(id) {
+            return createAPIAction({ api, type: GET_STDOUT, path: `/commands/${ id }/stdout`, id });
         },
 
-        getStderr({ id }) {
-            return dispatch => {
-                dispatch({ type: GET_STDERR_REQ });
-
-                api.get(`/commands/${ id }/stderr`)
-                    .then(stderr => dispatch({ type: GET_STDERR_RESP, id, stderr }));
-            };
+        getStderr(id) {
+            return createAPIAction({ api, type: GET_STDERR, path: `/commands/${ id }/stderr`, id });
         },
     };
 }

@@ -5,14 +5,14 @@ import { connect } from 'web/common/redux';
 const { func, node, object } = PropTypes;
 
 @connect({
-    state: state => ({ latest: state.get('commands').first() }),
+    state: state => ({ commands: state.get('commands') }),
     actions: ['runCommand'],
 })
 export default class ShellContainer extends Component {
     static propTypes = {
         runCommand: func.isRequired,
         children: node,
-        latest: object,
+        commands: object,
     };
 
     static contextTypes = {
@@ -21,10 +21,10 @@ export default class ShellContainer extends Component {
 
     componentWillReceiveProps(props) {
         const { history } = this.context;
-        const { latest } = this.props;
+        const { commands } = this.props;
 
-        if (latest && props.latest && props.latest.id !== latest.id) {
-            history.push(`/plugins/shell/web/commands/${ props.latest.id }`);
+        if (commands.isSuccess() && props.commands.isSuccess() && commands.value.size && commands.value.first().value.id !== props.commands.value.first().value.id) {
+            history.push(`/plugins/shell/web/commands/${ props.commands.value.first().value.id }`);
         }
     }
 
@@ -33,9 +33,7 @@ export default class ShellContainer extends Component {
 
         const { runCommand } = this.props;
 
-        runCommand({
-            args: this.refs.text.value,
-        });
+        runCommand(this.refs.text.value);
     }
 
     render() {

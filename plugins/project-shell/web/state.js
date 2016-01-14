@@ -1,61 +1,49 @@
+import { handleAPIAction } from 'web/common/redux';
 import { Map, OrderedMap } from 'immutable';
+import ValueState from 'web/common/value_state';
 import moment from 'moment';
 
 import {
-    GET_COMMANDS_REQ, GET_COMMANDS_RESP,
-    POST_COMMAND_REQ, POST_COMMAND_RESP,
-    GET_COMMAND_REQ, GET_COMMAND_RESP,
-    GET_STDOUT_REQ, GET_STDOUT_RESP,
-    GET_STDERR_REQ, GET_STDERR_RESP,
+    GET_COMMANDS,
+    POST_COMMAND,
+    GET_COMMAND,
+    GET_STDOUT,
+    GET_STDERR,
 } from './actions';
 
 const defaultState = Map({
-    commands: OrderedMap(),
-    pending: OrderedMap(),
+    commands: new ValueState({ value: OrderedMap() }),
     stdout: Map(),
     stderr: Map(),
 });
 
-export default function(state, { type, ...args }) {
+export default function(state, { type, kind, body, ...args }) {
     if (!state) {
         state = defaultState;
     }
 
     switch (type) {
-        case GET_COMMANDS_REQ:
-            break;
-        case GET_COMMANDS_RESP:
-            state = state.set('commands', OrderedMap(args.commands.map(cmd => [cmd.id, cmd])));
+        case GET_COMMANDS:
+            state = handleAPIAction({ state, kind, path: 'commands', success: () => OrderedMap(body.map(cmd => [cmd.id, new ValueState({ value: cmd })])) });
             break;
 
-        case GET_COMMAND_REQ:
-            break;
-        case GET_COMMAND_RESP:
-            state = state.setIn(['commands', args.command.id], args.command);
+        case GET_COMMAND:
+            state = handleAPIAction({ state, kind, path: ['commands', 'value', args.id], success: () => body });
             break;
 
-        case POST_COMMAND_REQ:
-            const { cid, ...rest } = args;
-            state = state.setIn(['pending', cid], rest);
-            break;
-        case POST_COMMAND_RESP:
-            state = state.deleteIn(['pending', args.cid]);
-            state = state.setIn(['commands', args.cmd.id], args.cmd);
-            state = state.set('commands', state.get('commands').sortBy(cmd => -moment(cmd.started_at).unix()));
+        case POST_COMMAND:
+            state = handleAPIAction({ state, kind, path: ['commands', 'value', args.id], success: () => body });
+            state = state.set('commands', state.get('commands').setValue(
+                state.getIn(['commands', 'value']).filter(cmd => !!cmd.value).sortBy(cmd => -moment(cmd.value.started_at).unix())
+            ));
             break;
 
-        case GET_STDOUT_REQ:
+        case GET_STDOUT:
+            state = handleAPIAction({ state, kind, path: ['stdout', args.id], success: () => body });
             break;
 
-        case GET_STDOUT_RESP:
-            state = state.setIn(['stdout', args.id], args.stdout);
-            break;
-
-        case GET_STDERR_REQ:
-            break;
-
-        case GET_STDERR_RESP:
-            state = state.setIn(['stderr', args.id], args.stderr);
+        case GET_STDERR:
+            state = handleAPIAction({ state, kind, path: ['stderr', args.id], success: () => body });
             break;
     }
 
