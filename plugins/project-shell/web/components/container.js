@@ -25,7 +25,7 @@ export default class ShellContainer extends Component {
         const { router } = this.context;
         const { commands } = this.props;
 
-        if (commands.isSuccess() && props.commands.isSuccess() && commands.value.size && commands.value.first().value.id !== props.commands.value.first().value.id) {
+        if (commands.isSuccess() && props.commands.isSuccess() && commands.value.size && commands.value.first().value && commands.value.first().value.id !== props.commands.value.first().value.id) {
             router.push(`/plugins/shell/web/commands/${ props.commands.value.first().value.id }`);
         }
     }

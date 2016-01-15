@@ -26,7 +26,7 @@ export default class Command extends Component {
     render() {
         const { command, location } = this.props;
 
-        if (!command.isSuccess()) {
+        if (!command || !command.isSuccess()) {
             return null;
         }
 
@@ -60,7 +60,7 @@ class Stdout extends Component {
 
     render() {
         const { stdout } = this.props;
-        return <pre>{ stdout.value }</pre>;
+        return <pre>{ stdout && stdout.value }</pre>;
     }
 }
 
@@ -72,7 +72,7 @@ class Stderr extends Component {
     static propTypes = {
         id: string.isRequired,
         stderr: object,
-        getCommand: func.isRequired,
+        getStderr: func.isRequired,
     };
 
     componentWillMount() {
@@ -82,6 +82,6 @@ class Stderr extends Component {
 
     render() {
         const { stderr } = this.props;
-        return <pre>{ stderr.value }</pre>;
+        return <pre>{ stderr && stderr.value }</pre>;
     }
 }
