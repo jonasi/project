@@ -4,8 +4,16 @@ import ValueState from './value_state';
 import { PropTypes } from 'react';
 import { pick } from 'lodash';
 
-export function createAPIAction({ api, type, options, path, method = 'get', ...rest }) {
-    return dispatch => {
+export function thunk(context = {}) {
+    return store => next => action => {
+        return typeof action === 'function' ?
+            action(store.dispatch, store.getState, context) :
+            next(action);
+    };
+}
+
+export function createAPIAction({ type, options, path, method = 'get', ...rest }) {
+    return (dispatch, getState, { api }) => {
         dispatch({ type, kind: 'request', ...rest });
 
         return api[method](path, options)

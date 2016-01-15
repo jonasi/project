@@ -1,23 +1,30 @@
 import { brew } from './index.css';
 import React, { Component, PropTypes } from 'react';
 
-import { connect } from 'web/common/redux';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 import Tabs, { Tab } from 'web/common/components/tabs';
 import Link from 'web/common/components/link';
 
+import { getVersion, getInstalled, getAll } from '../actions';
 import brewImgURL from '../img/brew.png';
 
-const { object } = PropTypes;
+const { object, func } = PropTypes;
 
-@connect({
-    state: state => ({ version: state.get('version') }), 
-    onMount: ['getVersion'],
-})
+@connect(
+    state => ({ version: state.get('version') }), 
+    dispatch => bindActionCreators({ getVersion }, dispatch)
+)
 export default class BrewHome extends Component {
     static propTypes = {
         location: object.isRequired,
         version: object.isRequired,
+        getVersion: func.isRequired,
     };
+
+    componentWillMount() {
+        this.props.getVersion();
+    }
 
     render() {
         const { version, location } = this.props;
@@ -41,15 +48,19 @@ export default class BrewHome extends Component {
     }
 }
 
-
-@connect({
-    state: state => ({ installed: state.get('installed') }),
-    onMount: ['getInstalled'],
-})
+@connect(
+    state => ({ installed: state.get('installed') }),
+    dispatch => bindActionCreators({ getInstalled }, dispatch)
+)
 class Installed extends Component {
     static propTypes = {
         installed: object.isRequired,
+        getInstalled: func.isRequired,
     };
+
+    componentWillMount() {
+        this.props.getInstalled();
+    }
 
     render() {
         const { installed } = this.props;
@@ -57,14 +68,19 @@ class Installed extends Component {
     }
 }
 
-@connect({
-    state: state => ({ all: state.get('all') }),
-    onMount: ['getAll'],
-})
+@connect(
+    state => ({ all: state.get('all') }),
+    dispatch => bindActionCreators({ getAll }, dispatch)
+)
 class All extends Component {
     static propTypes = {
         all: object.isRequired,
+        getAll: func.isRequired,
     };
+
+    componentWillMount() {
+        this.props.getAll();
+    }
 
     render() {
         const { all } = this.props;

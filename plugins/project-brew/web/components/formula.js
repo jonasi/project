@@ -1,23 +1,30 @@
 import React, { Component, PropTypes } from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { getFormula } from '../actions';
 
-import { connect } from 'web/common/redux';
+const { object, func } = PropTypes;
 
-const { object } = PropTypes;
-
-@connect({
-    state: (state, props) => ({ formula: state.getIn(['formula', props.params.formula]) }),
-    onMount: (actions, props) => actions.getFormula(props.params.formula),
-})
+@connect(
+    (state, props) => ({ formula: state.getIn(['formula', props.params.formula]) }),
+    dispatch => bindActionCreators({ getFormula }, dispatch)
+)
 export default class extends Component {
     static propTypes = {
         formula: object,
         params: object.isRequired,
+        getFormula: func.isRequired,
     };
+
+    componentWillMount() {
+        const { getFormula, params } = this.props;
+        getFormula(params.formula);
+    }
 
     render() {
         let { formula } = this.props;
 
-        if (!formula.isSuccess()) {
+        if (!formula || !formula.isSuccess()) {
             return null;
         }
 

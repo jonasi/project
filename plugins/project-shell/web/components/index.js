@@ -1,19 +1,28 @@
 import { shell } from './index.css';
 
-import React, { Component } from 'react';
-import { connect } from 'web/common/redux';
+import React, { Component, PropTypes } from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 import moment from 'moment';
+import { getHistory } from '../actions';
 
 import Link from 'web/common/components/link';
 
-@connect({
-    state: state => ({ commands: state.get('commands') }),
-    onMount: ['getHistory'],
-})
+const { func, object } = PropTypes;
+
+@connect(
+    state => ({ commands: state.get('commands') }),
+    dispatch => bindActionCreators({ getHistory }, dispatch)
+)
 export default class Shell extends Component {
     static propTypes = {
-        commands: React.PropTypes.object,
+        commands: object,
+        getHistory: func.isRequired,
     };
+
+    componentWillMount() {
+        this.props.getHistory();
+    }
 
     render() {
         const { commands } = this.props;

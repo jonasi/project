@@ -1,22 +1,30 @@
 import styles from './sidebar.css';
 
 import React, { Component, PropTypes } from 'react';
-import { connect } from 'web/common/redux';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 import classnames from 'classnames';
 
 import Link from 'web/common/components/link';
 
-const { object, string } = PropTypes;
+import { loadPlugins } from 'web/app/actions';
 
-@connect({
-    state: state => ({ plugins: state.get('plugins') }),
-    onMount: ['loadPlugins'],
-})
+const { object, string, func } = PropTypes;
+
+@connect(
+    state => ({ plugins: state.get('plugins') }),
+    dispatch => bindActionCreators({ loadPlugins }, dispatch)
+)
 export default class Sidebar extends Component {
     static propTypes = {
         plugins: object,
         className: string,
+        loadPlugins: func.isRequired,
     };
+
+    componentWillMount() {
+        this.props.loadPlugins();
+    }
 
     render() {
         const { plugins, className} = this.props;

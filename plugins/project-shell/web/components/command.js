@@ -1,19 +1,27 @@
 import React, { Component, PropTypes } from 'react';
-import { connect } from 'web/common/redux';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 import Tabs, { Tab } from 'web/common/components/tabs';
+import { getCommand, getStdout, getStderr } from '../actions';
 
-const { object, string } = PropTypes;
+const { object, string, func } = PropTypes;
 
-@connect({
-    state: (state, props) => ({ command: state.getIn(['commands', 'value', props.params.id]) }),
-    onMount: (actions, props) => actions.getCommand(props.params.id),
-})
+@connect(
+    (state, props) => ({ command: state.getIn(['commands', 'value', props.params.id]) }),
+    dispatch => bindActionCreators({ getCommand }, dispatch)
+)
 export default class Command extends Component {
     static propTypes = {
         params: object.isRequired,
         location: object.isRequired,
         command: object,
+        getCommand: func.isRequired,
     };
+
+    componentWillMount() {
+        const { getCommand, params } = this.props;
+        getCommand(params.id);
+    }
 
     render() {
         const { command, location } = this.props;
@@ -34,15 +42,21 @@ export default class Command extends Component {
     }
 }
 
-@connect({
-    state: (state, props) => ({ stdout: state.getIn(['stdout', props.id]) }),
-    onMount: (actions, props) => actions.getStdout(props.id),
-})
+@connect(
+    (state, props) => ({ stdout: state.getIn(['stdout', props.id]) }),
+    dispatch => bindActionCreators({ getStdout }, dispatch)
+)
 class Stdout extends Component {
     static propTypes = {
         id: string.isRequired,
         stdout: object,
+        getStdout: func.isRequired,
     };
+
+    componentWillMount() {
+        const { getStdout, id } = this.props;
+        getStdout(id);
+    }
 
     render() {
         const { stdout } = this.props;
@@ -50,15 +64,21 @@ class Stdout extends Component {
     }
 }
 
-@connect({
-    state: (state, props) => ({ stderr: state.getIn(['stderr', props.id]) }),
-    onMount: (actions, props) => actions.getStderr(props.id),
-})
+@connect(
+    (state, props) => ({ stderr: state.getIn(['stderr', props.id]) }),
+    dispatch => bindActionCreators({ getStderr }, dispatch)
+)
 class Stderr extends Component {
     static propTypes = {
         id: string.isRequired,
         stderr: object,
+        getCommand: func.isRequired,
     };
+
+    componentWillMount() {
+        const { getStderr, id } = this.props;
+        getStderr(id);
+    }
 
     render() {
         const { stderr } = this.props;
