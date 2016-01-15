@@ -19,20 +19,20 @@ export class Tab extends Component {
     }
 }
 
-export default class extends Component {
+export default class Tabs extends Component {
     static contextTypes = {
-        location: object.isRequired,
-        history: object.isRequired,
+        router: object.isRequired,
     };
 
     static propTypes = {
         children: node.isRequired,
+        location: object.isRequired,
         defaultTab: string,
     };
 
     render() {
-        const { children, defaultTab } = this.props;
-        const { location: { pathname, query }, history: { createPath } } = this.context;
+        const { children, defaultTab, location: { pathname, query } } = this.props;
+        const { router: { createPath } } = this.context;
 
         const activeId = query.tab || defaultTab;
         const ch = Children.toArray(children);
@@ -48,7 +48,7 @@ export default class extends Component {
                 <ul className={ styles.tabs }>{
                     ch.map(c => {
                         const { id, label = id } = c.props;
-                        const to = createPath(pathname, { ...query, tab: id });
+                        const to = createPath({ pathname, query: {...query, tab: id }});
                         const cls = classnames({ active: c === active });
 
                         return (

@@ -1,4 +1,4 @@
-import { createHistory as oldHistory } from 'history';
+import { useRouterHistory, browserHistory } from 'react-router';
 
 export default class Comm {
     constructor(logger) {
@@ -6,7 +6,7 @@ export default class Comm {
         this._parent = window.parent === window ? null : window.parent;
         this._logger = logger.tag('component', 'comm');
 
-        this.history = createHistory(this);
+        this.history = useRouterHistory(createHistory(this))();
         window.addEventListener('message', e => this.onMessage(e), false);
     }
 
@@ -53,14 +53,15 @@ function proxyTransition(old, name, comm) {
     };
 }
 
-export function createHistory(comm) {
-    const o = oldHistory();
-    const n = Object.assign({}, o);
+function createHistory(comm) {
+    return function() {
+        const n = Object.assign({}, browserHistory);
 
-    for (const k of proxyMethods) {
-        n['_' + k] = o[k];
-        n[k] = proxyTransition(o, k, comm);
-    }
+        for (const k of proxyMethods) {
+            n['_' + k] = browserHistory[k];
+            n[k] = proxyTransition(browserHistory, k, comm);
+        }
 
-    return n;
+        return n;
+    };
 }

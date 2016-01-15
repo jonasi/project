@@ -13,13 +13,14 @@ const { object } = PropTypes;
     state: state => ({ version: state.get('version') }), 
     onMount: ['getVersion'],
 })
-export default class extends Component {
+export default class BrewHome extends Component {
     static propTypes = {
+        location: object.isRequired,
         version: object.isRequired,
     };
 
     render() {
-        const { version } = this.props;
+        const { version, location } = this.props;
 
         if (!version.isSuccess()) {
             return null;
@@ -31,7 +32,7 @@ export default class extends Component {
                     <img src={ brewImgURL } />
                 </a>
                 { version.value.version } { version.value.revision }
-                <Tabs>
+                <Tabs location={ location }>
                     <Tab id="installed" label="Installed" renderFn={ () => <Installed /> } />
                     <Tab id="all" label="All" renderFn={ () => <All /> } />
                 </Tabs>

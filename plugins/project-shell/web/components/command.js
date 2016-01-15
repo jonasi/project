@@ -11,11 +11,12 @@ const { object, string } = PropTypes;
 export default class Command extends Component {
     static propTypes = {
         params: object.isRequired,
+        location: object.isRequired,
         command: object,
     };
 
     render() {
-        const { command } = this.props;
+        const { command, location } = this.props;
 
         if (!command.isSuccess()) {
             return null;
@@ -24,7 +25,7 @@ export default class Command extends Component {
         return (
             <div>
                 <h5>{ command.value.id }</h5>
-                <Tabs>
+                <Tabs location={ location }>
                     <Tab id="stdout" label="Stdout" renderFn={ () => <Stdout id={ command.value.id } /> } />
                     <Tab id="stderr" label="Stderr" renderFn={ () => <Stderr id={ command.value.id } /> } />
                 </Tabs>
