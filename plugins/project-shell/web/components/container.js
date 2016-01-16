@@ -7,14 +7,14 @@ import { runCommand } from '../actions';
 const { func, node, object } = PropTypes;
 
 @connect(
-    state => ({ commands: state.get('commands') }),
+    state => ({ history: state.history }),
     dispatch => bindActionCreators({ runCommand }, dispatch)
 )
 export default class ShellContainer extends Component {
     static propTypes = {
         runCommand: func.isRequired,
         children: node,
-        commands: object,
+        history: object,
     };
 
     static contextTypes = {
@@ -23,10 +23,10 @@ export default class ShellContainer extends Component {
 
     componentWillReceiveProps(props) {
         const { router } = this.context;
-        const { commands } = this.props;
+        const { history } = this.props;
 
-        if (commands.isSuccess() && props.commands.isSuccess() && commands.value.size && commands.value.first().value && commands.value.first().value.id !== props.commands.value.first().value.id) {
-            router.push(`/plugins/shell/web/commands/${ props.commands.value.first().value.id }`);
+        if (history.isSuccess() && props.history.isSuccess() && history.value.size && history.value.first() && history.value.first().id !== props.history.value.first().id) {
+            router.push(`/plugins/shell/web/commands/${ props.history.value.first().id }`);
         }
     }
 

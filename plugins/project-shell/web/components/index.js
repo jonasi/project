@@ -11,12 +11,12 @@ import Link from 'web/common/components/link';
 const { func, object } = PropTypes;
 
 @connect(
-    state => ({ commands: state.get('commands') }),
+    state => ({ history: state.history }),
     dispatch => bindActionCreators({ getHistory }, dispatch)
 )
 export default class Shell extends Component {
     static propTypes = {
-        commands: object,
+        history: object,
         getHistory: func.isRequired,
     };
 
@@ -25,9 +25,9 @@ export default class Shell extends Component {
     }
 
     render() {
-        const { commands } = this.props;
+        const { history } = this.props;
 
-        if (!commands.isSuccess()) {
+        if (!history || !history.isSuccess()) {
             return null;
         }
 
@@ -35,7 +35,7 @@ export default class Shell extends Component {
             <div className={ shell }>
                 <table className="u-fill-width">
                     <tbody>{
-                        commands.value.map(({ value: cmd }) => (
+                        history.value.map(cmd => (
                             <tr key={ cmd.id }>
                                 <td><Link to={ `/plugins/shell/web/commands/${ cmd.id }` }>{ moment(cmd.started_at).fromNow() }</Link></td>
                                 <td><Link to={ `/plugins/shell/web/commands/${ cmd.id }` }>{ cmd.cmd } { cmd.args.join(' ') }</Link></td>

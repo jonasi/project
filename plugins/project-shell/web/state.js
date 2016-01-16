@@ -1,7 +1,7 @@
-import { handleAPIAction } from 'web/common/redux';
-import { Map, OrderedMap } from 'immutable';
-import ValueState from 'web/common/value_state';
-import moment from 'moment';
+import { List } from 'immutable';
+
+import { createAPIReducer, createAPIMapReducer, composeReducers } from 'web/common/redux';
+import { combineReducers } from 'redux';
 
 import {
     GET_COMMANDS,
@@ -11,41 +11,19 @@ import {
     GET_STDERR,
 } from './actions';
 
-const defaultState = Map({
-    commands: new ValueState({ value: OrderedMap() }),
-    stdout: Map(),
-    stderr: Map(),
-});
+const history = createAPIReducer({ type: GET_COMMANDS, transform: body => List(body) });
+const commands = createAPIMapReducer({ type: GET_COMMAND, selector: args => args.id });
+const stdout = createAPIMapReducer({ type: GET_STDOUT, selector: args => args.id });
+const stderr = createAPIMapReducer({ type: GET_STDERR, selector: args => args.id });
 
-export default function(state, { type, kind, body, ...args }) {
-    if (!state) {
-        state = defaultState;
+export default composeReducers(
+    combineReducers({ history, commands, stdout, stderr }),
+    (state, action) => {
+        if (action.type === POST_COMMAND && action.kind === 'response') {
+            const history = state.history.transformValue(v => v.unshift(action.body));
+            state = Object.assign({}, state, { history });
+        }
+
+        return state;
     }
-
-    switch (type) {
-        case GET_COMMANDS:
-            state = handleAPIAction({ state, kind, path: 'commands', success: () => OrderedMap(body.map(cmd => [cmd.id, new ValueState({ value: cmd })])) });
-            break;
-
-        case GET_COMMAND:
-            state = handleAPIAction({ state, kind, path: ['commands', 'value', args.id], success: () => body });
-            break;
-
-        case POST_COMMAND:
-            state = handleAPIAction({ state, kind, path: ['commands', 'value', args.id], success: () => body });
-            state = state.set('commands', state.get('commands').setValue(
-                state.getIn(['commands', 'value']).filter(cmd => !!cmd.value).sortBy(cmd => -moment(cmd.value.started_at).unix())
-            ));
-            break;
-
-        case GET_STDOUT:
-            state = handleAPIAction({ state, kind, path: ['stdout', args.id], success: () => body });
-            break;
-
-        case GET_STDERR:
-            state = handleAPIAction({ state, kind, path: ['stderr', args.id], success: () => body });
-            break;
-    }
-
-    return state;
-}
+);

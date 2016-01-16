@@ -7,7 +7,7 @@ import { getCommand, getStdout, getStderr } from '../actions';
 const { object, string, func } = PropTypes;
 
 @connect(
-    (state, props) => ({ command: state.getIn(['commands', 'value', props.params.id]) }),
+    (state, props) => ({ command: state.commands.get(props.params.id) }),
     dispatch => bindActionCreators({ getCommand }, dispatch)
 )
 export default class Command extends Component {
@@ -43,7 +43,7 @@ export default class Command extends Component {
 }
 
 @connect(
-    (state, props) => ({ stdout: state.getIn(['stdout', props.id]) }),
+    (state, props) => ({ stdout: state.stdout.get(props.id) }),
     dispatch => bindActionCreators({ getStdout }, dispatch)
 )
 class Stdout extends Component {
@@ -65,7 +65,7 @@ class Stdout extends Component {
 }
 
 @connect(
-    (state, props) => ({ stderr: state.getIn(['stderr', props.id]) }),
+    (state, props) => ({ stderr: state.stderr.get(props.id) }),
     dispatch => bindActionCreators({ getStderr }, dispatch)
 )
 class Stderr extends Component {

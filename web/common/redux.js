@@ -1,8 +1,5 @@
-import { connect as oldConnect } from 'react-redux';
-import { bindActionCreators } from 'redux';
 import ValueState from './value_state';
-import { PropTypes } from 'react';
-import { pick } from 'lodash';
+import { Map } from 'immutable';
 
 export function thunk(context = {}) {
     return store => next => action => {
@@ -21,13 +18,6 @@ export function createAPIAction({ type, options, path, method = 'get', ...rest }
     };
 }
 
-export function handleAPIAction({ state, kind, path, success }) {
-    const v = get(state, path, new ValueState());
-    const v2 = kind === 'request' ? v.setLoading() : v.setValue(success());
-
-    return set(state, path, v2);
-}
-
 const get = (state, path, def) => (
     state[typeof path === 'string' ? 'get' : 'getIn'](path, def)
 );
@@ -36,46 +26,49 @@ const set = (state, path, val) => (
     state[typeof path === 'string' ? 'set' : 'setIn'](path, val)
 );
 
-function onMountActions(onMount, actions, props) {
-    if (typeof onMount === 'function') {
-        onMount(actions, props);
-        return;
-    }
+export function createAPIReducer({ type, transform }) {
+    return function(state, { type: type2, kind, body }) {
+        if (!state) {
+            state = new ValueState();
+        }
 
-    onMount.forEach(action => actions[action]());
-}
-
-export function connect({
-    state: mapStateToProps,
-    actions: actionNames = [],
-    onMount = [],
-}) {
-    return function(Comp) {
-        const Wrapped = oldConnect(mapStateToProps)(Comp);
-
-        class Connected extends Wrapped {
-            constructor(props, context) {
-                super(props, context);
-
-                const { dispatch } = this.store;
-                const { actions } = context;
-
-                this.allActions = bindActionCreators(actions, dispatch);
-                this.actions = pick(this.allActions, actionNames);
-            }
-
-            componentWillMount() {
-                onMountActions(onMount, this.allActions, this.props);
-            }
-
-            updateMergedProps() {
-                super.updateMergedProps();
-                Object.assign(this.mergedProps, this.actions);
+        if (type === type2) {
+            if (kind === 'request') {
+                state = state.setLoading();
+            } else {
+                const v = transform ? transform(body) : body;
+                state = state.setValue(v);
             }
         }
 
-        Connected.contextTypes.actions = PropTypes.object.isRequired;
-
-        return Connected;
+        return state;
     };
+}
+
+export function createAPIMapReducer({ type, selector, transform }) {
+    return function(state, { type: type2, kind, body, ...args }) {
+        if (!state) {
+            state = new Map();
+        }
+
+        if (type === type2) {
+            const k = selector(args);
+            let v = get(state, k, new ValueState());
+
+            if (kind === 'request') {
+                v = v.setLoading();
+            } else {
+                const val = transform ? transform(body) : body;
+                v = v.setValue(val);
+            }
+
+            state = set(state, k, v);
+        }
+
+        return state;
+    };
+}
+
+export function composeReducers(...reducers) {
+    return (state, args) => reducers.reduce((state, fn) => fn(state, args), state);
 }

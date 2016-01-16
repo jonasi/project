@@ -35,6 +35,10 @@ export default class ValueState extends base {
         return this.set('state', 'loading');
     }
 
+    transformValue(fn) {
+        return this.setValue(fn(this.value));
+    }
+
     setValue(value) {
         return mutate(this, 'success', value, void 0);
     }

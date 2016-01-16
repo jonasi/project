@@ -1,25 +1,10 @@
-import { Map, List } from 'immutable';
-import ValueState from 'web/common/value_state';
-import { handleAPIAction } from 'web/common/redux';
+import { createAPIReducer } from 'web/common/redux';
+import { combineReducers } from 'redux';
 
 import {
     GET_PLUGINS,
 } from './actions';
 
-const defaultState = Map({
-    plugins: new ValueState(),
-});
+const plugins = createAPIReducer({ type: GET_PLUGINS });
 
-export default function(state, { type, kind, body }) {
-    if (!state) {
-        state = defaultState;
-    }
-
-    switch (type) {
-        case GET_PLUGINS:
-            state = handleAPIAction({ state, kind, path: 'plugins', success: () => List(body) });
-            break;
-    }
-
-    return state;
-}
+export default combineReducers({ plugins });
