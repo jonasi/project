@@ -1,8 +1,6 @@
-import React, { Component } from 'react';
-import { Link } from 'react-router';
+import React from 'react';
+import { Link as OldLink } from 'react-router';
 
-export default class extends Component {
-    render() {
-        return <Link { ...this.props }/>;
-    }
+export default function Link(props) {
+    return <OldLink { ...props } />;
 }

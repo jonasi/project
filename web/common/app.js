@@ -16,9 +16,9 @@ export default class App {
     constructor({ reducer, routes, apiPrefix = '', webPrefix = ''}) {
         this.root = document.getElementById('react-root');
         this.logger = new Logger();
-        this.api = new API(apiPrefix);
-        this.comm = new Comm(this.logger, webPrefix);
-        this.store = applyMiddleware(thunk({ api: this.api }))(createStore)(reducer);
+        this.api = new API(this.logger.child('api'), apiPrefix);
+        this.comm = new Comm(this.logger.child('comm'), webPrefix);
+        this.store = applyMiddleware(logActions(this.logger.child('redux')), thunk({ api: this.api }))(createStore)(reducer);
         this.routes = routes;
     }
 
@@ -40,4 +40,13 @@ export function render(options) {
     app.render();
 
     return app;
+}
+
+function logActions(logger) {
+    return () => next => action => {
+        const ret = next(action);
+        logger.debug('action dispatch', action, ret);
+
+        return ret;
+    };
 }

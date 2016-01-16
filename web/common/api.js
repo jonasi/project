@@ -3,8 +3,9 @@ import 'whatwg-fetch';
 const { fetch } = window;
 
 export default class API {
-    constructor(prefix = '') {
+    constructor(logger, prefix = '') {
         this.prefix = prefix;
+        this.logger = logger;
     }
 
     get(path, options = {}) {
@@ -30,8 +31,13 @@ export default class API {
     call(path, options = {}) {
         path = this.prefix + path;
 
+        const t = Date.now();
+        this.logger.debug('API REQUEST', path, options);
+
         return fetch(path, options)
             .then(resp => {
+                this.logger.debug('API RESPONSE', path, Date.now() - t, resp, headerObj(resp.headers));
+
                 if (resp.headers.get('content-type') !== 'application/json') {
                     return resp.text();
                 }
@@ -43,7 +49,14 @@ export default class API {
 
                     return d.data;
                 });
-        });
+            })
+            .then(d => {
+                this.logger.debug('API BODY', path, Date.now() - t, d);
+                return d;
+            }, err => {
+                this.logger.error('API ERROR', path, Date.now() - t, err);
+                throw err;
+            });
     }
 }
 
@@ -67,4 +80,15 @@ export function loadPlugin(name) {
         script.src = `/plugins/${ name }/assets/plugin.js`;
         head.appendChild(script);
     });
+}
+
+function headerObj(headers) {
+    const obj = {};
+    const it = headers.entries();
+
+    for (let e = it.next(); !e.done; e = it.next()) {
+        obj[e.value[0]] = e.value[1];
+    }
+
+    return obj;
 }
