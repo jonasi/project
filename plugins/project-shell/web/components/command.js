@@ -7,13 +7,12 @@ import { getCommand, getStdout, getStderr } from '../actions';
 const { object, string, func } = PropTypes;
 
 @connect(
-    (state, props) => ({ command: state.commands.get(props.params.id) }),
+    (state, props) => ({ command: state.app.commands.get(props.params.id) }),
     dispatch => bindActionCreators({ getCommand }, dispatch)
 )
 export default class Command extends Component {
     static propTypes = {
         params: object.isRequired,
-        location: object.isRequired,
         command: object,
         getCommand: func.isRequired,
     };
@@ -24,7 +23,7 @@ export default class Command extends Component {
     }
 
     render() {
-        const { command, location } = this.props;
+        const { command } = this.props;
 
         if (!command || !command.isSuccess()) {
             return null;
@@ -33,7 +32,7 @@ export default class Command extends Component {
         return (
             <div>
                 <h5>{ command.value.id }</h5>
-                <Tabs location={ location }>
+                <Tabs>
                     <Tab id="stdout" label="Stdout" renderFn={ () => <Stdout id={ command.value.id } /> } />
                     <Tab id="stderr" label="Stderr" renderFn={ () => <Stderr id={ command.value.id } /> } />
                 </Tabs>
@@ -43,7 +42,7 @@ export default class Command extends Component {
 }
 
 @connect(
-    (state, props) => ({ stdout: state.stdout.get(props.id) }),
+    (state, props) => ({ stdout: state.app.stdout.get(props.id) }),
     dispatch => bindActionCreators({ getStdout }, dispatch)
 )
 class Stdout extends Component {
@@ -65,7 +64,7 @@ class Stdout extends Component {
 }
 
 @connect(
-    (state, props) => ({ stderr: state.stderr.get(props.id) }),
+    (state, props) => ({ stderr: state.app.stderr.get(props.id) }),
     dispatch => bindActionCreators({ getStderr }, dispatch)
 )
 class Stderr extends Component {

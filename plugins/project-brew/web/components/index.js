@@ -12,7 +12,7 @@ import brewImgURL from '../img/brew.png';
 const { object, func } = PropTypes;
 
 @connect(
-    state => ({ version: state.version }),
+    state => ({ version: state.app.version, location: state.routing.location }),
     dispatch => bindActionCreators({ getVersion }, dispatch)
 )
 export default class BrewHome extends Component {
@@ -49,7 +49,7 @@ export default class BrewHome extends Component {
 }
 
 @connect(
-    state => ({ installed: state.installed }),
+    state => ({ installed: state.app.installed }),
     dispatch => bindActionCreators({ getInstalled }, dispatch)
 )
 class Installed extends Component {
@@ -69,7 +69,7 @@ class Installed extends Component {
 }
 
 @connect(
-    state => ({ all: state.all }),
+    state => ({ all: state.app.all }),
     dispatch => bindActionCreators({ getAll }, dispatch)
 )
 class All extends Component {

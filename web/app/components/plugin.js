@@ -1,12 +1,14 @@
 import styles from './plugin.css';
 import React, { Component, PropTypes } from 'react';
+import { connect } from 'react-redux';
 
-const { object } = PropTypes;
+const { object, string } = PropTypes;
 
-export default class extends Component {
+@connect(state => ({ search: state.routing.location.search }))
+export default class Plugin extends Component {
     static propTypes = {
         params: object.isRequired,
-        location: object.isRequired,
+        search: string.isRequired,
     };
 
     static contextTypes = {
@@ -41,7 +43,7 @@ export default class extends Component {
     buildSrc(props = this.props) {
         const { 
             params: { plugin, splat },
-            location: { search },
+            search,
         } = props;
 
         let src = `/plugins/${ plugin }`;

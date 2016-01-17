@@ -11,7 +11,7 @@ import Link from 'web/common/components/link';
 const { func, object } = PropTypes;
 
 @connect(
-    state => ({ history: state.history }),
+    state => ({ history: state.app.history }),
     dispatch => bindActionCreators({ getHistory }, dispatch)
 )
 export default class Shell extends Component {

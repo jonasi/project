@@ -6,7 +6,7 @@ import { getFormula } from '../actions';
 const { object, func } = PropTypes;
 
 @connect(
-    (state, props) => ({ formula: state.formula.get(props.params.formula) }),
+    (state, props) => ({ formula: state.app.formula.get(props.params.formula) }),
     dispatch => bindActionCreators({ getFormula }, dispatch)
 )
 export default class extends Component {

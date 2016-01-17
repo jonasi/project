@@ -2,6 +2,7 @@ import styles from './tabs.css';
 
 import React, { Component, PropTypes, Children } from 'react';
 import classnames from 'classnames';
+import { connect } from 'react-redux';
 
 import Link from 'web/common/components/link';
 
@@ -19,6 +20,9 @@ export class Tab extends Component {
     }
 }
 
+@connect(
+    state => ({ location: state.routing.location })
+)
 export default class Tabs extends Component {
     static contextTypes = {
         router: object.isRequired,

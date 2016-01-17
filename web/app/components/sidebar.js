@@ -12,7 +12,7 @@ import { loadPlugins } from 'web/app/actions';
 const { object, string, func } = PropTypes;
 
 @connect(
-    state => ({ plugins: state.plugins }),
+    state => ({ plugins: state.app.plugins }),
     dispatch => bindActionCreators({ loadPlugins }, dispatch)
 )
 export default class Sidebar extends Component {

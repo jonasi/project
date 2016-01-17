@@ -5,8 +5,9 @@ import { render as reactRender } from 'react-dom';
 import { Router } from 'react-router';
 import Comm from './comm';
 import Logger from './logger';
-import { createStore, applyMiddleware } from 'redux';
+import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { thunk } from 'web/common/redux';
+import { syncHistory, routeReducer } from 'redux-simple-router';
 
 import API from 'web/common/api';
 
@@ -18,7 +19,16 @@ export default class App {
         this.logger = new Logger();
         this.api = new API(this.logger.child('api'), apiPrefix);
         this.comm = new Comm(this.logger.child('comm'), webPrefix);
-        this.store = applyMiddleware(logActions(this.logger.child('redux')), thunk({ api: this.api }))(createStore)(reducer);
+
+        const middleware = [
+            logActions(this.logger.child('redux')),
+            thunk({ api: this.api }),
+            syncHistory(this.comm.history),
+        ];
+
+        reducer = combineReducers({ routing: routeReducer, app: reducer });
+
+        this.store = applyMiddleware(...middleware)(createStore)(reducer);
         this.routes = routes;
     }
 
