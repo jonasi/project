@@ -20,9 +20,7 @@ export class Tab extends Component {
     }
 }
 
-@connect(
-    state => ({ location: state.routing.location })
-)
+@connect(state => ({ location: state.routing.location }))
 export default class Tabs extends Component {
     static contextTypes = {
         router: object.isRequired,

@@ -4,19 +4,14 @@ export const GET_VERSION = 'get_version';
 export const GET_INSTALLED = 'get_installed';
 export const GET_ALL = 'get_all';
 export const GET_FORMULA = 'get_formula';
+export const POST_FORMULA = 'post_formula';
+export const DELETE_FORMULA = 'delete_formula';
+export const POST_SEARCH = 'post_search';
 
-export function getVersion() {
-    return createAPIAction({ type: GET_VERSION, path: `/version` });
-}
-
-export function getInstalled() {
-    return createAPIAction({ type: GET_INSTALLED, path: `/formulae?filter=installed` });
-}
-
-export function getAll() {
-    return createAPIAction({ type: GET_ALL, path: `/formulae?filter=all` });
-}
-
-export function getFormula(formula) {
-    return createAPIAction({ type: GET_FORMULA, path: `/formulae/${ formula }`, formula });
-}
+export const loadVersion = () => createAPIAction(GET_VERSION, `/version`);
+export const loadInstalled = () => createAPIAction(GET_INSTALLED, `/installed`);
+export const loadAll = () => createAPIAction(GET_ALL, `/formulae`);
+export const loadFormula = formula => createAPIAction(GET_FORMULA, `/formulae/${ formula }`, { context: { formula } });
+export const install = formula => createAPIAction(POST_FORMULA, `/installed/${ formula }`, { method: 'post', context: { formula } });
+export const uninstall = formula => createAPIAction(GET_FORMULA, `/installed/${ formula }`, { method: 'delete', context: { formula } });
+export const search = query => createAPIAction(POST_SEARCH, `/search?q=${ query }`);

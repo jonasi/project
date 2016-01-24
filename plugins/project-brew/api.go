@@ -10,41 +10,86 @@ import (
 
 var apiService = hateoas.NewService(
 	hateoas.ServiceUse(api.JSON),
-	hateoas.AddResource(root, getVersion, listFormulae, getFormula),
+	hateoas.AddResource(
+		root,
+		version,
+		formulae,
+		installed,
+		installedFormula,
+		formula,
+		search,
+	),
 )
 
 var root = hateoas.NewResource(
 	hateoas.Path("/"),
-	hateoas.AddLink("version", getVersion),
-	hateoas.AddLink("formulae", listFormulae),
+	hateoas.AddLink("version", version),
+	hateoas.AddLink("formulae", formulae),
 )
 
-var getVersion = hateoas.NewResource(
+var version = hateoas.NewResource(
 	hateoas.Path("/version"),
 	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 		return getBrew(c).Version()
 	})),
 )
 
-var listFormulae = hateoas.NewResource(
+var formulae = hateoas.NewResource(
 	hateoas.Path("/formulae"),
 	hateoas.GET(
 		middleware.EtagHandlerFunc(func(c context.Context) (interface{}, string, error) {
-			filter := mohttp.GetPathValues(c).Query.String("filter")
+			return getBrew(c).ListAll()
+		}),
+	),
+)
 
-			if filter == "all" {
-				return getBrew(c).ListAll()
-			}
+var formula = hateoas.NewResource(
+	hateoas.Path("/formulae/:formula"),
+	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
+		name := mohttp.GetPathValues(c).Params.String("formula")
+		return getBrew(c).Info(name)
+	})),
+)
 
+var installed = hateoas.NewResource(
+	hateoas.Path("/installed"),
+	hateoas.GET(
+		middleware.EtagHandlerFunc(func(c context.Context) (interface{}, string, error) {
 			return getBrew(c).ListInstalled()
 		}),
 	),
 )
 
-var getFormula = hateoas.NewResource(
-	hateoas.Path("/formulae/:formula"),
+var installedFormula = hateoas.NewResource(
+	hateoas.Path("/installed/:formula"),
 	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 		name := mohttp.GetPathValues(c).Params.String("formula")
-		return getBrew(c).Info(name)
+		f, err := getBrew(c).Info(name)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if len(f.Installed) == 0 {
+			return nil, mohttp.HTTPError(404)
+		}
+
+		return f, nil
+	})),
+	hateoas.POST(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
+		name := mohttp.GetPathValues(c).Params.String("formula")
+		return getBrew(c).Install(name)
+	})),
+	hateoas.DELETE(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
+		name := mohttp.GetPathValues(c).Params.String("formula")
+		return getBrew(c).Uninstall(name)
+	})),
+)
+
+var search = hateoas.NewResource(
+	hateoas.Path("/search"),
+	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
+		q := mohttp.GetPathValues(c).Query.String("q")
+		return getBrew(c).Search(q)
 	})),
 )

@@ -6,28 +6,41 @@ import { bindActionCreators } from 'redux';
 import Tabs, { Tab } from 'web/common/components/tabs';
 import Link from 'web/common/components/link';
 
-import { getVersion, getInstalled, getAll } from '../actions';
+import { loadVersion, loadInstalled, loadAll, search } from '../actions';
+import { getVersion, getInstalled, getAll } from '../state';
 import brewImgURL from '../img/brew.png';
 
 const { object, func } = PropTypes;
 
 @connect(
-    state => ({ version: state.app.version, location: state.routing.location }),
-    dispatch => bindActionCreators({ getVersion }, dispatch)
+    state => ({ version: getVersion(state) }),
+    dispatch => bindActionCreators({ loadVersion, search }, dispatch)
 )
 export default class BrewHome extends Component {
     static propTypes = {
-        location: object.isRequired,
         version: object.isRequired,
-        getVersion: func.isRequired,
+        loadVersion: func.isRequired,
+        search: func.isRequired,
     };
 
     componentWillMount() {
-        this.props.getVersion();
+        this.props.loadVersion();
+    }
+
+    onSubmit(e) {
+        e.preventDefault();
+
+        const v = (this.refs.search.value || '').trim();
+
+        if (!v) {
+            return;
+        }
+
+        this.props.search(v);
     }
 
     render() {
-        const { version, location } = this.props;
+        const { version } = this.props;
 
         if (!version.isSuccess()) {
             return null;
@@ -39,7 +52,11 @@ export default class BrewHome extends Component {
                     <img src={ brewImgURL } />
                 </a>
                 { version.value.version } { version.value.revision }
-                <Tabs location={ location }>
+                <form onSubmit={ e => this.onSubmit(e) }>
+                    <input ref="search" type="text" />
+                    <input type="submit" />
+                </form>
+                <Tabs>
                     <Tab id="installed" label="Installed" renderFn={ () => <Installed /> } />
                     <Tab id="all" label="All" renderFn={ () => <All /> } />
                 </Tabs>
@@ -49,17 +66,17 @@ export default class BrewHome extends Component {
 }
 
 @connect(
-    state => ({ installed: state.app.installed }),
-    dispatch => bindActionCreators({ getInstalled }, dispatch)
+    state => ({ installed: getInstalled(state) }),
+    dispatch => bindActionCreators({ loadInstalled }, dispatch)
 )
 class Installed extends Component {
     static propTypes = {
         installed: object.isRequired,
-        getInstalled: func.isRequired,
+        loadInstalled: func.isRequired,
     };
 
     componentWillMount() {
-        this.props.getInstalled();
+        this.props.loadInstalled();
     }
 
     render() {
@@ -69,17 +86,17 @@ class Installed extends Component {
 }
 
 @connect(
-    state => ({ all: state.app.all }),
-    dispatch => bindActionCreators({ getAll }, dispatch)
+    state => ({ all: getAll(state) }),
+    dispatch => bindActionCreators({ loadAll }, dispatch)
 )
 class All extends Component {
     static propTypes = {
         all: object.isRequired,
-        getAll: func.isRequired,
+        loadAll: func.isRequired,
     };
 
     componentWillMount() {
-        this.props.getAll();
+        this.props.loadAll();
     }
 
     render() {

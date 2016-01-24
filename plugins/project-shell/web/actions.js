@@ -6,37 +6,22 @@ export const GET_COMMAND = 'get_command';
 export const GET_STDOUT = 'get_stdout';
 export const GET_STDERR = 'get_stderr';
 
-export function getHistory() {
-    return createAPIAction({ type: GET_COMMANDS, path: `/commands` });
-}
+export const loadHistory = () => createAPIAction(GET_COMMANDS, `/commands`);
 
-export function getCommand(id) {
-    return createAPIAction({ type: GET_COMMAND, path: `/commands/${ id }`, id });
-}
+export const loadCommand = id => createAPIAction(GET_COMMAND, `/commands/${ id }`, { context: { id } });
 
-export function runCommand(args) {
+export const runCommand = args => {
     const cid = randomId();
     args = ['sh', '-c', args];
 
     const body = JSON.stringify({ args });
+    const opts = { method: 'post', fetchOptions: { body }, context: { args, cid } };
 
-    return createAPIAction({
-        type: POST_COMMAND, 
-        method: 'post',
-        path: `/commands`,
-        options: { body },
-        args,
-        cid,
-    });
-}
+    return createAPIAction(POST_COMMAND, `/commands`, opts);
+};
 
-export function getStdout(id) {
-    return createAPIAction({ type: GET_STDOUT, path: `/commands/${ id }/stdout`, id });
-}
-
-export function getStderr(id) {
-    return createAPIAction({ type: GET_STDERR, path: `/commands/${ id }/stderr`, id });
-}
+export const loadStdout = id => createAPIAction(GET_STDOUT, `/commands/${ id }/stdout`, { context: { id } });
+export const loadStderr = id => createAPIAction(GET_STDERR, `/commands/${ id }/stderr`, { context: { id } });
 
 function randomId() {
     return String(Math.random()).substr(2);

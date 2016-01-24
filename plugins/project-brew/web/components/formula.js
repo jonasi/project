@@ -1,24 +1,25 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { getFormula } from '../actions';
+import { loadFormula } from '../actions';
+import { getFormula } from '../state';
 
 const { object, func } = PropTypes;
 
 @connect(
-    (state, props) => ({ formula: state.app.formula.get(props.params.formula) }),
-    dispatch => bindActionCreators({ getFormula }, dispatch)
+    (state, props) => ({ formula: getFormula(state, props.params.formula) }),
+    dispatch => bindActionCreators({ loadFormula }, dispatch)
 )
 export default class extends Component {
     static propTypes = {
         formula: object,
         params: object.isRequired,
-        getFormula: func.isRequired,
+        loadFormula: func.isRequired,
     };
 
     componentWillMount() {
-        const { getFormula, params } = this.props;
-        getFormula(params.formula);
+        const { loadFormula, params } = this.props;
+        loadFormula(params.formula);
     }
 
     render() {

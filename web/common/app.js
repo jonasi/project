@@ -5,13 +5,15 @@ import { render as reactRender } from 'react-dom';
 import { Router } from 'react-router';
 import Comm from './comm';
 import Logger from './logger';
-import { createStore, applyMiddleware, combineReducers } from 'redux';
-import { thunk } from 'web/common/redux';
+import { createStore, applyMiddleware } from 'redux';
+import { combineReducers, composeReducers, thunk } from 'web/common/redux';
 import { syncHistory, routeReducer } from 'redux-simple-router';
 
 import API from 'web/common/api';
 
 import ContextProvider from 'web/common/components/context_provider';
+
+const routingReducer = combineReducers({ routing: routeReducer });
 
 export default class App {
     constructor({ reducer, routes, apiPrefix = '', webPrefix = ''}) {
@@ -26,7 +28,7 @@ export default class App {
             syncHistory(this.comm.history),
         ];
 
-        reducer = combineReducers({ routing: routeReducer, app: reducer });
+        reducer = composeReducers(reducer, routingReducer);
 
         this.store = applyMiddleware(...middleware)(createStore)(reducer);
         this.routes = routes;

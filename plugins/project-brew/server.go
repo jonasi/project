@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gopkg.in/inconshreveable/log15.v2"
 	"io"
+	"strings"
 	"sync"
 	"time"
 )
@@ -112,6 +113,32 @@ func (b *BrewServer) ListAll() ([]*Formula, string, error) {
 
 func (b *BrewServer) Info(name string) (*Formula, error) {
 	return Info(name)
+}
+
+func (b *BrewServer) Install(name string) (string, error) {
+	return Install(name)
+}
+
+func (b *BrewServer) Uninstall(name string) (string, error) {
+	return Remove(name)
+}
+
+func (b *BrewServer) Search(query string) ([]*Formula, error) {
+	all, _, err := b.ListAll()
+
+	if err != nil {
+		return nil, err
+	}
+
+	fo := []*Formula{}
+
+	for _, f := range all {
+		if strings.Contains(f.Name, query) {
+			fo = append(fo, f)
+		}
+	}
+
+	return fo, nil
 }
 
 func tok(f []*Formula) string {

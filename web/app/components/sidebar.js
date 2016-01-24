@@ -8,11 +8,12 @@ import classnames from 'classnames';
 import Link from 'web/common/components/link';
 
 import { loadPlugins } from 'web/app/actions';
+import { getPlugins } from 'web/app/state';
 
 const { object, string, func } = PropTypes;
 
 @connect(
-    state => ({ plugins: state.app.plugins }),
+    state => ({ plugins: getPlugins(state) }),
     dispatch => bindActionCreators({ loadPlugins }, dispatch)
 )
 export default class Sidebar extends Component {
@@ -27,7 +28,7 @@ export default class Sidebar extends Component {
     }
 
     render() {
-        const { plugins, className} = this.props;
+        const { plugins, className } = this.props;
 
         if (!plugins.isSuccess()) {
             return null;

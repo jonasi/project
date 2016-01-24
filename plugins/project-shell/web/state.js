@@ -1,7 +1,6 @@
 import { List } from 'immutable';
 
-import { createAPIReducer, createAPIMapReducer, composeReducers } from 'web/common/redux';
-import { combineReducers } from 'redux';
+import { Scope, createAPIReducer, createAPIMapReducer, composeReducers, combineReducers } from 'web/common/redux';
 
 import {
     GET_COMMANDS,
@@ -11,12 +10,14 @@ import {
     GET_STDERR,
 } from './actions';
 
-const history = createAPIReducer({ type: GET_COMMANDS, transform: body => List(body) });
-const commands = createAPIMapReducer({ type: GET_COMMAND, selector: args => args.id });
-const stdout = createAPIMapReducer({ type: GET_STDOUT, selector: args => args.id });
-const stderr = createAPIMapReducer({ type: GET_STDERR, selector: args => args.id });
+const ns = new Scope('shell');
 
-export default composeReducers(
+const history = createAPIReducer(GET_COMMANDS, { transform: body => List(body) });
+const commands = createAPIMapReducer(GET_COMMAND, ctxt => ctxt.id);
+const stdout = createAPIMapReducer(GET_STDOUT, ctxt => ctxt.id);
+const stderr = createAPIMapReducer(GET_STDERR, ctxt => ctxt.id);
+
+export const reducer = ns.reducer(composeReducers(
     combineReducers({ history, commands, stdout, stderr }),
     (state, action) => {
         if (action.type === POST_COMMAND && action.kind === 'response') {
@@ -26,4 +27,9 @@ export default composeReducers(
 
         return state;
     }
-);
+));
+
+export const getCommand = ns.selector((state, id) => state.commands.get(id));
+export const getHistory = ns.selector(state => state.history);
+export const getStdout = ns.selector((state, id) => state.stdout.get(id));
+export const getStderr = ns.selector((state, id) => state.stderr.get(id));

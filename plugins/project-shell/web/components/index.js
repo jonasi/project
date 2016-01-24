@@ -4,24 +4,25 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import moment from 'moment';
-import { getHistory } from '../actions';
+import { loadHistory } from '../actions';
+import { getHistory } from '../state';
 
 import Link from 'web/common/components/link';
 
 const { func, object } = PropTypes;
 
 @connect(
-    state => ({ history: state.app.history }),
-    dispatch => bindActionCreators({ getHistory }, dispatch)
+    state => ({ history: getHistory(state) }),
+    dispatch => bindActionCreators({ loadHistory }, dispatch)
 )
 export default class Shell extends Component {
     static propTypes = {
         history: object,
-        getHistory: func.isRequired,
+        loadHistory: func.isRequired,
     };
 
     componentWillMount() {
-        this.props.getHistory();
+        this.props.loadHistory();
     }
 
     render() {

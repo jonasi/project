@@ -3,12 +3,13 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { runCommand } from '../actions';
+import { getHistory } from '../state';
 import { routeActions } from 'redux-simple-router';
 
 const { func, node, object } = PropTypes;
 
 @connect(
-    state => ({ history: state.app.history }),
+    state => ({ history: getHistory(state) }),
     dispatch => bindActionCreators({ runCommand, push: routeActions.push }, dispatch)
 )
 export default class ShellContainer extends Component {

@@ -48,6 +48,7 @@
     "redux": "^3.0.5",
     "redux-simple-router": "^2.0.3",
     "redux-thunk": "^1.0.3",
+    "reselect": "^2.0.2",
     "skeleton.css": "^2.0.4",
     "style-loader": "^0.13.0",
     "url-loader": "^0.5.7",

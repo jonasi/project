@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-const version = "0.0.1"
+const pluginVersion = "0.0.1"
 
 var setBrew, _getBrew = mohttp.ContextValueAccessors("github.com/jonasi/project/plugins/project-brew.Brew")
 
@@ -16,7 +16,7 @@ func getBrew(c context.Context) *BrewServer {
 }
 
 func main() {
-	pl := plugin.New("brew", version)
+	pl := plugin.New("brew", pluginVersion)
 	pl.Use(setBrew(NewBrewServer(pl.Logger)))
 	pl.RegisterAPI(apiService)
 

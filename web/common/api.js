@@ -84,11 +84,7 @@ export function loadPlugin(name) {
 
 function headerObj(headers) {
     const obj = {};
-    const it = headers.entries();
-
-    for (let e = it.next(); !e.done; e = it.next()) {
-        obj[e.value[0]] = e.value[1];
-    }
+    headers.forEach((v, k) => obj[k] = v);
 
     return obj;
 }

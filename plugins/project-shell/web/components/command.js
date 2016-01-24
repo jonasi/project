@@ -2,24 +2,25 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import Tabs, { Tab } from 'web/common/components/tabs';
-import { getCommand, getStdout, getStderr } from '../actions';
+import { loadCommand, loadStdout, loadStderr } from '../actions';
+import { getCommand, getStderr, getStdout } from '../state';
 
 const { object, string, func } = PropTypes;
 
 @connect(
-    (state, props) => ({ command: state.app.commands.get(props.params.id) }),
-    dispatch => bindActionCreators({ getCommand }, dispatch)
+    (state, props) => ({ command: getCommand(state, props.params.id) }),
+    dispatch => bindActionCreators({ loadCommand }, dispatch)
 )
 export default class Command extends Component {
     static propTypes = {
         params: object.isRequired,
         command: object,
-        getCommand: func.isRequired,
+        loadCommand: func.isRequired,
     };
 
     componentWillMount() {
-        const { getCommand, params } = this.props;
-        getCommand(params.id);
+        const { loadCommand, params } = this.props;
+        loadCommand(params.id);
     }
 
     render() {
@@ -42,19 +43,19 @@ export default class Command extends Component {
 }
 
 @connect(
-    (state, props) => ({ stdout: state.app.stdout.get(props.id) }),
-    dispatch => bindActionCreators({ getStdout }, dispatch)
+    (state, props) => ({ stdout: getStdout(state, props.id) }),
+    dispatch => bindActionCreators({ loadStdout }, dispatch)
 )
 class Stdout extends Component {
     static propTypes = {
         id: string.isRequired,
         stdout: object,
-        getStdout: func.isRequired,
+        loadStdout: func.isRequired,
     };
 
     componentWillMount() {
-        const { getStdout, id } = this.props;
-        getStdout(id);
+        const { loadStdout, id } = this.props;
+        loadStdout(id);
     }
 
     render() {
@@ -64,19 +65,19 @@ class Stdout extends Component {
 }
 
 @connect(
-    (state, props) => ({ stderr: state.app.stderr.get(props.id) }),
-    dispatch => bindActionCreators({ getStderr }, dispatch)
+    (state, props) => ({ stderr: getStderr(state, props.id) }),
+    dispatch => bindActionCreators({ loadStderr }, dispatch)
 )
 class Stderr extends Component {
     static propTypes = {
         id: string.isRequired,
         stderr: object,
-        getStderr: func.isRequired,
+        loadStderr: func.isRequired,
     };
 
     componentWillMount() {
-        const { getStderr, id } = this.props;
-        getStderr(id);
+        const { loadStderr, id } = this.props;
+        loadStderr(id);
     }
 
     render() {

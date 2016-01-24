@@ -75,12 +75,16 @@ func Info(name string) (*Formula, error) {
 	return &f[0], nil
 }
 
-func Install(name string) (*Formula, error) {
-	return nil, nil
+func Install(name string) (string, error) {
+	return exec.Command("brew", "install", name).StringOutput(true)
 }
 
-func Upgrade(name string) (*Formula, error) {
-	return nil, nil
+func Remove(name string) (string, error) {
+	return exec.Command("brew", "remove", name).StringOutput(true)
+}
+
+func Upgrade(name string) (string, error) {
+	return exec.Command("brew", "upgrade", name).StringOutput(true)
 }
 
 func Update() error {
