@@ -1,4 +1,5 @@
 import { isPlainObject, get as objectGet, set as objectSet } from 'lodash';
+import { bindActionCreators } from 'redux';
 
 export const get = (state, path, def) => {
     if (!state) {
@@ -21,3 +22,5 @@ export const set = (state, path, val) => {
 };
 
 export const identity = x => x;
+
+export const boundActions = actions => dispatch => bindActionCreators(actions, dispatch);

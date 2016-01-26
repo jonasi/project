@@ -1,4 +1,5 @@
 import { get, set } from './utils';
+import { createSelector } from 'reselect';
 
 export default class Scope {
     constructor(name) {
@@ -19,7 +20,12 @@ export default class Scope {
         );
     }
 
-    selector(selector) {
-        return (state, ...args) => selector(this.getState(state), ...args);
+    selector(...selectors) {
+        const fn = selectors.length === 1 ? selectors[0] : createSelector(...selectors);
+        const v = (state, ...args) => fn(this.getState(state), ...args);
+
+        v.unscoped = selectors[selectors.length - 1];
+
+        return v;
     }
 }

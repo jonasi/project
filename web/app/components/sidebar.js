@@ -2,7 +2,7 @@ import styles from './sidebar.css';
 
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
+import { boundActions } from 'web/common/redux';
 import classnames from 'classnames';
 
 import Link from 'web/common/components/link';
@@ -14,7 +14,7 @@ const { object, string, func } = PropTypes;
 
 @connect(
     state => ({ plugins: getPlugins(state) }),
-    dispatch => bindActionCreators({ loadPlugins }, dispatch)
+    boundActions({ loadPlugins })
 )
 export default class Sidebar extends Component {
     static propTypes = {

@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
+import { boundActions } from 'web/common/redux';
 import Tabs, { Tab } from 'web/common/components/tabs';
 import { loadCommand, loadStdout, loadStderr } from '../actions';
 import { getCommand, getStderr, getStdout } from '../state';
@@ -9,7 +9,7 @@ const { object, string, func } = PropTypes;
 
 @connect(
     (state, props) => ({ command: getCommand(state, props.params.id) }),
-    dispatch => bindActionCreators({ loadCommand }, dispatch)
+    boundActions({ loadCommand })
 )
 export default class Command extends Component {
     static propTypes = {
@@ -44,7 +44,7 @@ export default class Command extends Component {
 
 @connect(
     (state, props) => ({ stdout: getStdout(state, props.id) }),
-    dispatch => bindActionCreators({ loadStdout }, dispatch)
+    boundActions({ loadStdout })
 )
 class Stdout extends Component {
     static propTypes = {
@@ -66,7 +66,7 @@ class Stdout extends Component {
 
 @connect(
     (state, props) => ({ stderr: getStderr(state, props.id) }),
-    dispatch => bindActionCreators({ loadStderr }, dispatch)
+    boundActions({ loadStderr })
 )
 class Stderr extends Component {
     static propTypes = {

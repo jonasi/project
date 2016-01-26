@@ -1,5 +1,4 @@
 import { Scope, combineReducers, createAPIReducer, createAPIMapReducer } from 'web/common/redux';
-import { createSelector } from 'reselect';
 
 import {
     GET_VERSION,
@@ -21,7 +20,7 @@ export const getVersion = ns.selector(state => state.version);
 export const getFormula = ns.selector((state, f) => state.formula.get(f));
 export const getInstalled = ns.selector(state => state.installed);
 export const getAll = ns.selector(state => state.all);
-export const getUpgradeable = ns.selector(createSelector(
-    getInstalled, 
-    formulae => formulae.filter(f => f.version.stable !== f.installed[0].version)
-));
+export const getUpgradeable = ns.selector(
+    getInstalled.unscoped,
+    formulae => formulae.transformValue(v => v ? v.filter(f => f.versions.stable !== f.installed[0].version) : v)
+);

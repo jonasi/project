@@ -36,7 +36,7 @@ export default class ValueState extends base {
     }
 
     transformValue(fn) {
-        return this.setValue(fn(this.value));
+        return this.set('value', fn(this.value));
     }
 
     setValue(value) {

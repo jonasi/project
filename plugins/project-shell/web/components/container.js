@@ -1,16 +1,16 @@
 import { container } from './container.css';
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
+import { boundActions } from 'web/common/redux';
 import { runCommand } from '../actions';
 import { getHistory } from '../state';
-import { routeActions } from 'redux-simple-router';
+import { push } from 'react-router-redux';
 
 const { func, node, object } = PropTypes;
 
 @connect(
     state => ({ history: getHistory(state) }),
-    dispatch => bindActionCreators({ runCommand, push: routeActions.push }, dispatch)
+    boundActions({ runCommand, push })
 )
 export default class ShellContainer extends Component {
     static propTypes = {

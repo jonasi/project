@@ -2,7 +2,7 @@ import { shell } from './index.css';
 
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
+import { boundActions } from 'web/common/redux';
 import moment from 'moment';
 import { loadHistory } from '../actions';
 import { getHistory } from '../state';
@@ -13,7 +13,7 @@ const { func, object } = PropTypes;
 
 @connect(
     state => ({ history: getHistory(state) }),
-    dispatch => bindActionCreators({ loadHistory }, dispatch)
+    boundActions({ loadHistory })
 )
 export default class Shell extends Component {
     static propTypes = {

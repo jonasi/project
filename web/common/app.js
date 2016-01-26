@@ -7,7 +7,7 @@ import Comm from './comm';
 import Logger from './logger';
 import { createStore, applyMiddleware } from 'redux';
 import { combineReducers, composeReducers, thunk } from 'web/common/redux';
-import { syncHistory, routeReducer } from 'redux-simple-router';
+import { syncHistory, routeReducer } from 'react-router-redux';
 
 import API from 'web/common/api';
 
