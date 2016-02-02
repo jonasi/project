@@ -13,6 +13,8 @@ var apiService = hateoas.NewService(
 	hateoas.AddResource(
 		root,
 		version,
+		config,
+		env,
 		formulae,
 		installed,
 		installedFormula,
@@ -31,6 +33,20 @@ var version = hateoas.NewResource(
 	hateoas.Path("/version"),
 	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
 		return getBrew(c).Version()
+	})),
+)
+
+var config = hateoas.NewResource(
+	hateoas.Path("/config"),
+	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
+		return getBrew(c).Config()
+	})),
+)
+
+var env = hateoas.NewResource(
+	hateoas.Path("/env"),
+	hateoas.GET(mohttp.DataHandlerFunc(func(c context.Context) (interface{}, error) {
+		return getBrew(c).Env()
 	})),
 )
 

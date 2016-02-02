@@ -1,10 +1,13 @@
 import styles from './plugin.css';
 import React, { Component, PropTypes } from 'react';
-import { connect } from 'react-redux';
+import { connect } from 'web/common/redux';
+import { getLocation } from 'web/common/routing';
 
 const { object, string } = PropTypes;
 
-@connect(state => ({ search: state.routing.location.search }))
+@connect({
+    mapState: state => ({ search: getLocation(state).search }),
+})
 export default class Plugin extends Component {
     static propTypes = {
         params: object.isRequired,

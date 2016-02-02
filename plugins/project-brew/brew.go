@@ -87,6 +87,56 @@ func Upgrade(name string) (string, error) {
 	return exec.Command("brew", "upgrade", name).StringOutput(true)
 }
 
+func parseConfig(b []byte) map[string]string {
+	var (
+		mp    = map[string]string{}
+		lines = strings.Split(strings.TrimSpace(string(b)), "\n")
+	)
+
+	for _, l := range lines {
+		parts := strings.SplitN(l, ":", 2)
+		mp[strings.TrimSpace(parts[0])] = strings.TrimSpace(parts[1])
+	}
+
+	return mp
+}
+
+func parseEnv(b []byte) map[string]string {
+	var (
+		mp    = map[string]string{}
+		lines = strings.Split(strings.TrimSpace(string(b)), "\n")
+	)
+
+	for _, l := range lines {
+		l = l[7:]                                // strip `export `
+		parts := strings.SplitN(l, "=", 2)       // k="v"
+		parts[1] = parts[1][1 : len(parts[1])-1] // strip quotes on value
+		mp[parts[0]] = parts[1]
+	}
+
+	return mp
+}
+
+func Config() (map[string]string, error) {
+	b, err := exec.Command("brew", "config").Output()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return parseConfig(b), nil
+}
+
+func Env() (map[string]string, error) {
+	b, err := exec.Command("brew", "--env").Output()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return parseEnv(b), nil
+}
+
 func Update() error {
 	return nil
 }

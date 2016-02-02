@@ -2,9 +2,10 @@ import styles from './tabs.css';
 
 import React, { Component, PropTypes, Children } from 'react';
 import classnames from 'classnames';
-import { connect } from 'react-redux';
+import { connect } from 'web/common/redux';
 
 import Link from 'web/common/components/link';
+import { getLocation } from 'web/common/routing';
 
 const { node, string, object, func } = PropTypes;
 
@@ -20,7 +21,9 @@ export class Tab extends Component {
     }
 }
 
-@connect(state => ({ location: state.routing.location }))
+@connect({
+    mapState: state => ({ location: getLocation(state) }),
+})
 export default class Tabs extends Component {
     static contextTypes = {
         router: object.isRequired,

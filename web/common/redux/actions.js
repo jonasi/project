@@ -1,3 +1,5 @@
+import { bindActionCreators } from 'redux';
+
 export function createAPIAction(type, path, { guard, fetchOptions, method = 'get', context } = {}) {
     return (dispatch, getState, { api }) => {
         if (guard && guard(getState())) {
@@ -10,3 +12,5 @@ export function createAPIAction(type, path, { guard, fetchOptions, method = 'get
             .then(body => dispatch({ type, payload: { kind: 'response', body, context } }));
     };
 }
+
+export const boundActions = actions => dispatch => bindActionCreators(actions, dispatch);

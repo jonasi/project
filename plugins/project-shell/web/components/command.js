@@ -1,27 +1,20 @@
 import React, { Component, PropTypes } from 'react';
-import { connect } from 'react-redux';
-import { boundActions } from 'web/common/redux';
+import { connect } from 'web/common/redux';
 import Tabs, { Tab } from 'web/common/components/tabs';
 import { loadCommand, loadStdout, loadStderr } from '../actions';
 import { getCommand, getStderr, getStdout } from '../state';
 
-const { object, string, func } = PropTypes;
+const { object, string } = PropTypes;
 
-@connect(
-    (state, props) => ({ command: getCommand(state, props.params.id) }),
-    boundActions({ loadCommand })
-)
+@connect({
+    mapState: (state, props) => ({ command: getCommand(state, props.params.id) }),
+    onMount: props => loadCommand(props.params.id),
+})
 export default class Command extends Component {
     static propTypes = {
         params: object.isRequired,
         command: object,
-        loadCommand: func.isRequired,
     };
-
-    componentWillMount() {
-        const { loadCommand, params } = this.props;
-        loadCommand(params.id);
-    }
 
     render() {
         const { command } = this.props;
@@ -42,21 +35,15 @@ export default class Command extends Component {
     }
 }
 
-@connect(
-    (state, props) => ({ stdout: getStdout(state, props.id) }),
-    boundActions({ loadStdout })
-)
+@connect({
+    mapState: (state, props) => ({ stdout: getStdout(state, props.id) }),
+    onMount: props => loadStdout(props.id),
+})
 class Stdout extends Component {
     static propTypes = {
         id: string.isRequired,
         stdout: object,
-        loadStdout: func.isRequired,
     };
-
-    componentWillMount() {
-        const { loadStdout, id } = this.props;
-        loadStdout(id);
-    }
 
     render() {
         const { stdout } = this.props;
@@ -64,21 +51,15 @@ class Stdout extends Component {
     }
 }
 
-@connect(
-    (state, props) => ({ stderr: getStderr(state, props.id) }),
-    boundActions({ loadStderr })
-)
+@connect({
+    mapState: (state, props) => ({ stderr: getStderr(state, props.id) }),
+    onMount: props => loadStderr(props.id),
+})
 class Stderr extends Component {
     static propTypes = {
         id: string.isRequired,
         stderr: object,
-        loadStderr: func.isRequired,
     };
-
-    componentWillMount() {
-        const { loadStderr, id } = this.props;
-        loadStderr(id);
-    }
 
     render() {
         const { stderr } = this.props;

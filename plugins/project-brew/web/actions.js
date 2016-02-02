@@ -7,6 +7,8 @@ export const GET_FORMULA = '@@project/brew/get_formula';
 export const POST_FORMULA = '@@project/brew/post_formula';
 export const DELETE_FORMULA = '@@project/brew/delete_formula';
 export const POST_SEARCH = '@@project/brew/post_search';
+export const GET_CONFIG = '@@project/brew/get_config';
+export const GET_ENV = '@@project/brew/get_env';
 
 // load the brew version from the api
 export const loadVersion = () => createAPIAction(GET_VERSION, `/version`);
@@ -28,3 +30,9 @@ export const uninstall = formula => createAPIAction(GET_FORMULA, `/installed/${ 
 
 // load all formulae that match a given query
 export const search = query => createAPIAction(POST_SEARCH, `/search?q=${ query }`, { context: { query } });
+
+// load the brew config from the api
+export const loadConfig = () => createAPIAction(GET_CONFIG, `/config`);
+
+// load the brew env from the api
+export const loadEnv = () => createAPIAction(GET_ENV, `/env`);

@@ -21,7 +21,11 @@ export const runCommand = args => {
     const body = JSON.stringify({ args });
     const opts = { method: 'post', fetchOptions: { body }, context: { args, cid } };
 
-    return createAPIAction(POST_COMMAND, `/commands`, opts);
+    const action = createAPIAction(POST_COMMAND, `/commands`, opts);
+
+    return (dispatch, getState, ...args) => {
+        return action(dispatch, getState, ...args);
+    };
 };
 
 // load the stdout response from the api

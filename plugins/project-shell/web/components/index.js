@@ -1,29 +1,23 @@
 import { shell } from './index.css';
 
 import React, { Component, PropTypes } from 'react';
-import { connect } from 'react-redux';
-import { boundActions } from 'web/common/redux';
+import { connect } from 'web/common/redux';
 import moment from 'moment';
 import { loadHistory } from '../actions';
 import { getHistory } from '../state';
 
 import Link from 'web/common/components/link';
 
-const { func, object } = PropTypes;
+const { object } = PropTypes;
 
-@connect(
-    state => ({ history: getHistory(state) }),
-    boundActions({ loadHistory })
-)
+@connect({
+    mapState: state => ({ history: getHistory(state) }),
+    onMount: () => loadHistory(),
+})
 export default class Shell extends Component {
     static propTypes = {
         history: object,
-        loadHistory: func.isRequired,
     };
-
-    componentWillMount() {
-        this.props.loadHistory();
-    }
 
     render() {
         const { history } = this.props;

@@ -6,15 +6,13 @@ import { Router } from 'react-router';
 import Comm from './comm';
 import Logger from './logger';
 import { compose, createStore, applyMiddleware } from 'redux';
-import { combineReducers, composeReducers, thunk } from 'web/common/redux';
-import { syncHistory, routeReducer } from 'react-router-redux';
+import { composeReducers, thunk } from 'web/common/redux';
+import { syncHistory, reducer as routingReducer } from 'web/common/routing';
 
 import API from 'web/common/api';
 
 import ContextProvider from 'web/common/components/context_provider';
 import DevTools from 'web/common/components/devtools';
-
-const routingReducer = combineReducers({ routing: routeReducer });
 
 export default class App {
     constructor({ reducer, routes, apiPrefix = '', webPrefix = ''}) {

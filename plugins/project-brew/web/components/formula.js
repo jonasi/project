@@ -1,26 +1,19 @@
 import React, { Component, PropTypes } from 'react';
-import { connect } from 'react-redux';
-import { boundActions } from 'web/common/redux';
+import { connect } from 'web/common/redux';
 import { loadFormula } from '../actions';
 import { getFormula } from '../state';
 
-const { object, func } = PropTypes;
+const { object } = PropTypes;
 
-@connect(
-    (state, props) => ({ formula: getFormula(state, props.params.formula) }),
-    boundActions({ loadFormula })
-)
+@connect({
+    mapState: (state, props) => ({ formula: getFormula(state, props.params.formula) }),
+    onMount: props => loadFormula(props.params.formula),
+})
 export default class extends Component {
     static propTypes = {
         formula: object,
         params: object.isRequired,
-        loadFormula: func.isRequired,
     };
-
-    componentWillMount() {
-        const { loadFormula, params } = this.props;
-        loadFormula(params.formula);
-    }
 
     render() {
         let { formula } = this.props;

@@ -1,8 +1,7 @@
 import styles from './sidebar.css';
 
 import React, { Component, PropTypes } from 'react';
-import { connect } from 'react-redux';
-import { boundActions } from 'web/common/redux';
+import { connect } from 'web/common/redux';
 import classnames from 'classnames';
 
 import Link from 'web/common/components/link';
@@ -10,22 +9,17 @@ import Link from 'web/common/components/link';
 import { loadPlugins } from 'web/app/actions';
 import { getPlugins } from 'web/app/state';
 
-const { object, string, func } = PropTypes;
+const { object, string } = PropTypes;
 
-@connect(
-    state => ({ plugins: getPlugins(state) }),
-    boundActions({ loadPlugins })
-)
+@connect({
+    mapState: state => ({ plugins: getPlugins(state) }),
+    onMount: () => loadPlugins(),
+})
 export default class Sidebar extends Component {
     static propTypes = {
         plugins: object,
         className: string,
-        loadPlugins: func.isRequired,
     };
-
-    componentWillMount() {
-        this.props.loadPlugins();
-    }
 
     render() {
         const { plugins, className } = this.props;

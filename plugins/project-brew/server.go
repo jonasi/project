@@ -73,6 +73,14 @@ func (b *BrewServer) Version() (*Version, error) {
 	return b.version, nil
 }
 
+func (b *BrewServer) Config() (map[string]string, error) {
+	return Config()
+}
+
+func (b *BrewServer) Env() (map[string]string, error) {
+	return Env()
+}
+
 func (b *BrewServer) ListInstalled() ([]*Formula, string, error) {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
